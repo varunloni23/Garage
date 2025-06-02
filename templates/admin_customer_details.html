@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Customer Details - GarageHub Admin{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Customer Details</h1>
+            <div>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline">Back to Dashboard</a>
+                <a href="{{ url_for('admin_edit_customer', customer_id=customer.id) }}" class="btn btn-secondary">Edit Customer</a>
+            </div>
+        </div>
+        
+        <div class="card" style="margin-top: 2rem; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <h2 style="font-size: 1.8rem; margin-bottom: 1rem;">{{ customer.name }}</h2>
+                    <div style="margin-bottom: 1.5rem;">
+                        <span class="badge" style="background-color: {% if customer.role == 'admin' %}#e74c3c{% else %}var(--primary){% endif %}; color: white; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; font-size: 1.2rem;">
+                            {{ customer.role|upper }}
+                        </span>
+                    </div>
+                    <p><strong>Email:</strong> {{ customer.email }}</p>
+                </div>
+                <div>
+                    <p style="margin-bottom: 0.5rem;"><strong>Customer ID:</strong> {{ customer.id }}</p>
+                    <p style="margin-bottom: 0.5rem;"><strong>Vehicles:</strong> {{ vehicles|length }}</p>
+                    <p><strong>Appointments:</strong> {{ appointments|length }}</p>
+                </div>
+            </div>
+            
+            <div style="margin-top: 2rem; border-top: 1px solid #eee; padding-top: 2rem;">
+                <h3 style="font-size: 1.4rem; margin-bottom: 1rem;">Vehicles</h3>
+                
+                {% if vehicles|length > 0 %}
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Make</th>
+                                    <th>Model</th>
+                                    <th>Year</th>
+                                    <th>License Plate</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for vehicle in vehicles %}
+                                    <tr>
+                                        <td>{{ vehicle.id }}</td>
+                                        <td>{{ vehicle.make }}</td>
+                                        <td>{{ vehicle.model }}</td>
+                                        <td>{{ vehicle.year }}</td>
+                                        <td>{{ vehicle.license_plate }}</td>
+                                        <td>
+                                            <a href="{{ url_for('admin_view_vehicle', vehicle_id=vehicle.id) }}" class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.9rem;">VIEW</a>
+                                            <a href="{{ url_for('admin_vehicle_history', vehicle_id=vehicle.id) }}" class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.9rem;">HISTORY</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p>No vehicles registered for this customer.</p>
+                {% endif %}
+            </div>
+            
+            <div style="margin-top: 2rem; border-top: 1px solid #eee; padding-top: 2rem;">
+                <h3 style="font-size: 1.4rem; margin-bottom: 1rem;">Appointment History</h3>
+                
+                {% if appointments|length > 0 %}
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Service</th>
+                                    <th>Vehicle</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in appointments %}
+                                    <tr>
+                                        <td>{{ appointment.appointment_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>{{ appointment.service_name }}</td>
+                                        <td>{{ appointment.make }} {{ appointment.model }}</td>
+                                        <td>
+                                            <span class="badge" style="
+                                                background-color: {% if appointment.status == 'completed' %}#2ecc71{% elif appointment.status == 'confirmed' %}#3498db{% elif appointment.status == 'pending' %}#f39c12{% else %}#e74c3c{% endif %};
+                                                color: white;
+                                                padding: 0.3rem 0.8rem;
+                                                border-radius: 20px;
+                                                font-weight: 600;
+                                            ">
+                                                {{ appointment.status|upper }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('admin_view_appointment', appointment_id=appointment.id) }}" class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.9rem;">VIEW</a>
+                                            <a href="{{ url_for('admin_edit_appointment', appointment_id=appointment.id) }}" class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.9rem;">EDIT</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p>No appointment history for this customer.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %} 

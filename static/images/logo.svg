@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="90" fill="#1a4b8c" />
+  
+  <!-- Garage icon -->
+  <path d="M50,80 L150,80 L150,160 L130,160 L130,110 L70,110 L70,160 L50,160 Z" fill="#ffffff" />
+  
+  <!-- Roof -->
+  <path d="M30,85 L100,40 L170,85 L155,95 L100,60 L45,95 Z" fill="#ff6b00" />
+  
+  <!-- Car silhouette -->
+  <path d="M70,130 L130,130 L125,140 L115,140 L110,150 L90,150 L85,140 L75,140 Z" fill="#ff6b00" />
+  
+  <!-- Wheels -->
+  <circle cx="80" cy="145" r="5" fill="#333333" />
+  <circle cx="120" cy="145" r="5" fill="#333333" />
+</svg> 

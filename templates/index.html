@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block title %}GarageHub - Your Trusted Auto Service Partner{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-content animate-fade-in">
+            <h1>Professional Auto Services You Can Trust</h1>
+            <p>Experience top-quality automotive care with our expert technicians and state-of-the-art facilities. We're committed to keeping your vehicle running at its best.</p>
+            <div class="hero-buttons">
+                <a href="{{ url_for('services') }}" class="btn btn-secondary">Our Services</a>
+                <a href="{{ url_for('contact') }}" class="btn btn-outline">Contact Us</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="section">
+    <div class="container">
+        <h2 class="section-title animate-fade-in">Why Choose Us</h2>
+        
+        <div class="services-grid">
+            <div class="service-card animate-fade-in delay-100">
+                <div class="service-image">
+                    <img src="{{ url_for('static', filename='images/expert-technicians.jpg') }}" alt="Expert Technicians">
+                </div>
+                <div class="service-content">
+                    <h3>Expert Technicians</h3>
+                    <p>Our certified mechanics have years of experience working with all vehicle makes and models.</p>
+                </div>
+            </div>
+            
+            <div class="service-card animate-fade-in delay-200">
+                <div class="service-image">
+                    <img src="{{ url_for('static', filename='images/modern-equipment.jpg') }}" alt="Modern Equipment">
+                </div>
+                <div class="service-content">
+                    <h3>Modern Equipment</h3>
+                    <p>We use the latest diagnostic and repair equipment to ensure accurate and efficient service.</p>
+                </div>
+            </div>
+            
+            <div class="service-card animate-fade-in delay-300">
+                <div class="service-image">
+                    <img src="{{ url_for('static', filename='images/quality-parts.jpg') }}" alt="Quality Parts">
+                </div>
+                <div class="service-content">
+                    <h3>Quality Parts</h3>
+                    <p>We only use high-quality OEM or equivalent parts to ensure reliability and performance.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Preview Section -->
+<section class="section" style="background-color: var(--light-bg);">
+    <div class="container">
+        <h2 class="section-title animate-fade-in">Our Services</h2>
+        
+        <div class="services-grid">
+            <div class="service-card animate-fade-in delay-100">
+                <div class="service-image">
+                    <img src="{{ url_for('static', filename='images/oil-change.jpg') }}" alt="Oil Change Service">
+                </div>
+                <div class="service-content">
+                    <h3>Oil Change</h3>
+                    <p>Regular oil changes to keep your engine running smoothly and extend its life.</p>
+                    <div class="service-price">From $49.99</div>
+                    <a href="{{ url_for('services') }}#oil-change" class="btn btn-primary">Learn More</a>
+                </div>
+            </div>
+            
+            <div class="service-card animate-fade-in delay-200">
+                <div class="service-image">
+                    <img src="{{ url_for('static', filename='images/brake-service.jpg') }}" alt="Brake Service">
+                </div>
+                <div class="service-content">
+                    <h3>Brake Service</h3>
+                    <p>Complete brake inspection and replacement to ensure your safety on the road.</p>
+                    <div class="service-price">From $149.99</div>
+                    <a href="{{ url_for('services') }}#brake-service" class="btn btn-primary">Learn More</a>
+                </div>
+            </div>
+            
+            <div class="service-card animate-fade-in delay-300">
+                <div class="service-image">
+                    <img src="{{ url_for('static', filename='images/engine-tune-up.jpg') }}" alt="Engine Tune-up">
+                </div>
+                <div class="service-content">
+                    <h3>Engine Tune-up</h3>
+                    <p>Comprehensive engine service to optimize performance and fuel efficiency.</p>
+                    <div class="service-price">From $199.99</div>
+                    <a href="{{ url_for('services') }}#engine-tune-up" class="btn btn-primary">Learn More</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center" style="margin-top: 3rem;">
+            <a href="{{ url_for('services') }}" class="btn btn-secondary">View All Services</a>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="section">
+    <div class="container">
+        <h2 class="section-title animate-fade-in">What Our Customers Say</h2>
+        
+        <div class="services-grid">
+            <div class="service-card animate-fade-in delay-100">
+                <div class="service-content">
+                    <div style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem;">
+                        <i class="fas fa-quote-left"></i>
+                    </div>
+                    <p style="font-style: italic; margin-bottom: 1.5rem;">
+                        "The team at GarageHub is amazing! They fixed my car quickly and at a fair price. I won't take my vehicle anywhere else."
+                    </p>
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 50px; height: 50px; border-radius: 50%; overflow: hidden; margin-right: 1rem;">
+                            <img src="{{ url_for('static', filename='images/customer1.jpg') }}" alt="Customer" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom: 0.2rem;">John Smith</h4>
+                            <p style="margin: 0; font-size: 0.9rem; color: #777;">Loyal Customer</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="service-card animate-fade-in delay-200">
+                <div class="service-content">
+                    <div style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem;">
+                        <i class="fas fa-quote-left"></i>
+                    </div>
+                    <p style="font-style: italic; margin-bottom: 1.5rem;">
+                        "I've been bringing my cars here for years. The staff is knowledgeable, honest, and always provides excellent service."
+                    </p>
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 50px; height: 50px; border-radius: 50%; overflow: hidden; margin-right: 1rem;">
+                            <img src="{{ url_for('static', filename='images/customer2.jpg') }}" alt="Customer" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom: 0.2rem;">Sarah Johnson</h4>
+                            <p style="margin: 0; font-size: 0.9rem; color: #777;">Regular Client</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="service-card animate-fade-in delay-300">
+                <div class="service-content">
+                    <div style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem;">
+                        <i class="fas fa-quote-left"></i>
+                    </div>
+                    <p style="font-style: italic; margin-bottom: 1.5rem;">
+                        "Their online appointment system is so convenient, and the service is always completed on time. Highly recommended!"
+                    </p>
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 50px; height: 50px; border-radius: 50%; overflow: hidden; margin-right: 1rem;">
+                            <img src="{{ url_for('static', filename='images/customer3.jpg') }}" alt="Customer" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom: 0.2rem;">Michael Brown</h4>
+                            <p style="margin: 0; font-size: 0.9rem; color: #777;">Satisfied Customer</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="section" style="background-color: var(--primary); color: var(--white); text-align: center;">
+    <div class="container">
+        <h2 class="section-title animate-fade-in" style="color: var(--white);">Ready to Experience Our Service?</h2>
+        <p class="animate-fade-in" style="max-width: 700px; margin: 0 auto 2rem; font-size: 1.1rem;">
+            Schedule an appointment today and let our expert technicians take care of your vehicle. We're committed to providing the best service at competitive prices.
+        </p>
+        <div class="animate-fade-in">
+            <a href="{{ url_for('register') }}" class="btn btn-secondary" style="margin-right: 1rem;">Register Now</a>
+            <a href="{{ url_for('contact') }}" class="btn btn-outline" style="border-color: var(--white); color: var(--white);">Contact Us</a>
+        </div>
+    </div>
+</section>
+{% endblock %} 

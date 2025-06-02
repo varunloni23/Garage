@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+
+{% block title %}Automotive Products - GarageHub{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="section" style="background-color: var(--primary); color: var(--white); padding: 4rem 0;">
+    <div class="container">
+        <h1 class="animate-fade-in" style="color: var(--white); font-size: 3rem; margin-bottom: 1rem;">Automotive Products</h1>
+        <p class="animate-fade-in" style="max-width: 700px; font-size: 1.2rem;">
+            Browse our selection of high-quality automotive parts, fluids, and accessories to keep your vehicle performing at its best.
+        </p>
+    </div>
+</section>
+
+<!-- Products Categories Section -->
+<section class="section">
+    <div class="container">
+        <h2 class="section-title animate-fade-in">Product Categories</h2>
+        
+        <div class="services-grid">
+            {% for category in [
+                {'name': 'Engine Oils & Fluids', 'image': 'category-oils.jpg', 'description': 'High-quality engine oils, transmission fluids, coolants, and more.'},
+                {'name': 'Filters', 'image': 'category-filters.jpg', 'description': 'Oil filters, air filters, fuel filters, and cabin air filters for all makes and models.'},
+                {'name': 'Brake Components', 'image': 'category-brakes.jpg', 'description': 'Brake pads, rotors, calipers, and brake fluids for optimal stopping power.'},
+                {'name': 'Batteries & Electrical', 'image': 'category-batteries.jpg', 'description': 'Car batteries, alternators, starters, and electrical components.'}
+            ] %}
+                <div class="service-card animate-fade-in">
+                    <div class="service-image">
+                        <img src="{{ url_for('static', filename='images/' + category.image) }}" alt="{{ category.name }}">
+                    </div>
+                    <div class="service-content">
+                        <h3>{{ category.name }}</h3>
+                        <p>{{ category.description }}</p>
+                        <a href="#products" class="btn btn-primary">View Products</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products Section -->
+<section id="products" class="section" style="background-color: var(--light-bg);">
+    <div class="container">
+        <h2 class="section-title animate-fade-in">Featured Products</h2>
+        
+        <div class="products-grid">
+            {% for product in products %}
+                <div class="product-card animate-fade-in">
+                    <div class="product-image">
+                        <img src="{{ product.image_url }}" alt="{{ product.name }}">
+                    </div>
+                    <div class="product-content">
+                        <h3>{{ product.name }}</h3>
+                        <p>{{ product.description }}</p>
+                        <div class="product-price">₹{{ product.price }}</div>
+                        <div class="product-stock">
+                            {% if product.stock > 0 %}
+                                In Stock ({{ product.stock }})
+                            {% else %}
+                                Out of Stock
+                            {% endif %}
+                        </div>
+                        {% if 'user_id' in session %}
+                            <a href="#" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Add to Cart</a>
+                        {% else %}
+                            <a href="{{ url_for('login') }}" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Login to Purchase</a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Engine Oils Section -->
+<section class="section">
+    <div class="container">
+        <h2 class="section-title animate-fade-in">Engine Oils & Fluids</h2>
+        
+        <div class="products-grid">
+            {% for product in [
+                {'name': 'Motor Oil (5W-30)', 'description': 'High-quality synthetic motor oil', 'price': '2499', 'stock': 50, 'image': 'products/motor-oil-5w30.jpg'},
+                {'name': 'Motor Oil (10W-40)', 'description': 'Conventional motor oil for older engines', 'price': '1699', 'stock': 45, 'image': 'products/motor-oil-10w40.jpg'},
+                {'name': 'Transmission Fluid', 'description': 'Automatic transmission fluid', 'price': '2099', 'stock': 30, 'image': 'products/transmission-fluid.jpg'},
+                {'name': 'Coolant/Antifreeze', 'description': 'All-season engine coolant', 'price': '1299', 'stock': 40, 'image': 'products/coolant.jpg'}
+            ] %}
+                <div class="product-card animate-fade-in">
+                    <div class="product-image">
+                        <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}">
+                    </div>
+                    <div class="product-content">
+                        <h3>{{ product.name }}</h3>
+                        <p>{{ product.description }}</p>
+                        <div class="product-price">₹{{ product.price }}</div>
+                        <div class="product-stock">
+                            {% if product.stock > 0 %}
+                                In Stock ({{ product.stock }})
+                            {% else %}
+                                Out of Stock
+                            {% endif %}
+                        </div>
+                        {% if 'user_id' in session %}
+                            <a href="#" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Add to Cart</a>
+                        {% else %}
+                            <a href="{{ url_for('login') }}" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Login to Purchase</a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Filters Section -->
+<section class="section" style="background-color: var(--light-bg);">
+    <div class="container">
+        <h2 class="section-title animate-fade-in">Filters</h2>
+        
+        <div class="products-grid">
+            {% for product in [
+                {'name': 'Oil Filter', 'description': 'Premium oil filter for most vehicles', 'price': '799', 'stock': 100, 'image': 'products/oil-filter.jpg'},
+                {'name': 'Air Filter', 'description': 'Engine air filter for better performance', 'price': '1199', 'stock': 75, 'image': 'products/air-filter.jpg'},
+                {'name': 'Cabin Air Filter', 'description': 'Improves air quality inside your vehicle', 'price': '1599', 'stock': 60, 'image': 'products/cabin-filter.jpg'},
+                {'name': 'Fuel Filter', 'description': 'Ensures clean fuel delivery to your engine', 'price': '999', 'stock': 50, 'image': 'products/fuel-filter.jpg'}
+            ] %}
+                <div class="product-card animate-fade-in">
+                    <div class="product-image">
+                        <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}">
+                    </div>
+                    <div class="product-content">
+                        <h3>{{ product.name }}</h3>
+                        <p>{{ product.description }}</p>
+                        <div class="product-price">₹{{ product.price }}</div>
+                        <div class="product-stock">
+                            {% if product.stock > 0 %}
+                                In Stock ({{ product.stock }})
+                            {% else %}
+                                Out of Stock
+                            {% endif %}
+                        </div>
+                        {% if 'user_id' in session %}
+                            <a href="#" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Add to Cart</a>
+                        {% else %}
+                            <a href="{{ url_for('login') }}" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Login to Purchase</a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Brake Components Section -->
+<section class="section">
+    <div class="container">
+        <h2 class="section-title animate-fade-in">Brake Components</h2>
+        
+        <div class="products-grid">
+            {% for product in [
+                {'name': 'Brake Pads', 'description': 'Ceramic brake pads for improved stopping power', 'price': '3999', 'stock': 30, 'image': 'products/brake-pads.jpg'},
+                {'name': 'Brake Rotors', 'description': 'Premium brake rotors for smooth braking', 'price': '6499', 'stock': 25, 'image': 'products/brake-rotors.jpg'},
+                {'name': 'Brake Fluid', 'description': 'DOT 3 brake fluid for hydraulic brake systems', 'price': '699', 'stock': 40, 'image': 'products/brake-fluid.jpg'},
+                {'name': 'Brake Calipers', 'description': 'Remanufactured brake calipers', 'price': '7499', 'stock': 15, 'image': 'products/brake-calipers.jpg'}
+            ] %}
+                <div class="product-card animate-fade-in">
+                    <div class="product-image">
+                        <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}">
+                    </div>
+                    <div class="product-content">
+                        <h3>{{ product.name }}</h3>
+                        <p>{{ product.description }}</p>
+                        <div class="product-price">₹{{ product.price }}</div>
+                        <div class="product-stock">
+                            {% if product.stock > 0 %}
+                                In Stock ({{ product.stock }})
+                            {% else %}
+                                Out of Stock
+                            {% endif %}
+                        </div>
+                        {% if 'user_id' in session %}
+                            <a href="#" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Add to Cart</a>
+                        {% else %}
+                            <a href="{{ url_for('login') }}" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Login to Purchase</a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="section" style="background-color: var(--primary); color: var(--white); text-align: center;">
+    <div class="container">
+        <h2 class="section-title animate-fade-in" style="color: var(--white);">Need Help Choosing the Right Products?</h2>
+        <p class="animate-fade-in" style="max-width: 700px; margin: 0 auto 2rem; font-size: 1.1rem;">
+            Our knowledgeable staff can help you select the right parts and products for your specific vehicle. Contact us today for expert advice.
+        </p>
+        <div class="animate-fade-in">
+            <a href="{{ url_for('contact') }}" class="btn btn-secondary" style="margin-right: 1rem;">Contact Us</a>
+            {% if 'user_id' in session %}
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline" style="border-color: var(--white); color: var(--white);">Go to Dashboard</a>
+            {% else %}
+                <a href="{{ url_for('register') }}" class="btn btn-outline" style="border-color: var(--white); color: var(--white);">Register Now</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %} 

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Service - GarageHub{% endblock %}
+
+{% block content %}
+<section class="content-section">
+    <div class="container">
+        <div class="section-header">
+            <h1>Delete Service</h1>
+            <a href="{{ url_for('admin_view_service', service_id=service.id) }}" class="btn btn-outline">Back to Service Details</a>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2>Confirm Deletion</h2>
+            </div>
+            
+            <div class="card-body">
+                <div class="alert alert-danger">
+                    <p><strong>Warning:</strong> You are about to delete the service "{{ service.name }}".</p>
+                    
+                    {% if appointments > 0 %}
+                        <p>This service is associated with {{ appointments }} appointment(s). Deleting this service may affect these appointments.</p>
+                    {% endif %}
+                    
+                    <p>This action cannot be undone. Are you sure you want to proceed?</p>
+                </div>
+                
+                <form action="{{ url_for('admin_delete_service', service_id=service.id) }}" method="POST">
+                    {% if appointments > 0 %}
+                        <input type="hidden" name="force_delete" value="1">
+                    {% endif %}
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-danger">Yes, Delete Service</button>
+                        <a href="{{ url_for('admin_view_service', service_id=service.id) }}" class="btn btn-outline">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %} 

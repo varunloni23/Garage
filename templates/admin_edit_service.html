@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Service - GarageHub{% endblock %}
+
+{% block content %}
+<section class="content-section">
+    <div class="container">
+        <div class="section-header">
+            <h1>Edit Service</h1>
+            <a href="{{ url_for('admin_view_service', service_id=service.id) }}" class="btn btn-outline">Back to Service Details</a>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2>Edit {{ service.name }}</h2>
+            </div>
+            
+            <div class="card-body">
+                <form action="{{ url_for('admin_edit_service', service_id=service.id) }}" method="POST">
+                    <div class="form-group">
+                        <label for="name">Service Name</label>
+                        <input type="text" id="name" name="name" class="form-control" value="{{ service.name }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" class="form-control" rows="4" required>{{ service.description }}</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="price">Price ($)</label>
+                        <input type="number" id="price" name="price" class="form-control" value="{{ service.price }}" step="0.01" min="0" required>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Update Service</button>
+                        <a href="{{ url_for('admin_view_service', service_id=service.id) }}" class="btn btn-outline">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %} 

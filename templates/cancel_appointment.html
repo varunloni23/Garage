@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Cancel Appointment - GarageHub{% endblock %}
+
+{% block content %}
+<section class="form-section">
+    <div class="container">
+        <div class="form-container">
+            <h2>Cancel Appointment</h2>
+            <p>Are you sure you want to cancel this appointment?</p>
+            
+            <div class="appointment-summary">
+                <p><strong>Service:</strong> {{ appointment.service_name }}</p>
+                <p><strong>Vehicle:</strong> {{ appointment.make }} {{ appointment.model }}</p>
+                <p><strong>Date & Time:</strong> {{ appointment.appointment_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                <p><strong>Status:</strong> 
+                    {% if appointment.status == 'pending' %}
+                        <span style="color: #ff9800; font-weight: 600;">Pending</span>
+                    {% elif appointment.status == 'confirmed' %}
+                        <span style="color: #2196f3; font-weight: 600;">Confirmed</span>
+                    {% endif %}
+                </p>
+                {% if appointment.notes %}
+                    <p><strong>Notes:</strong> {{ appointment.notes }}</p>
+                {% endif %}
+            </div>
+            
+            <form method="POST" action="{{ url_for('cancel_appointment', appointment_id=appointment.id) }}">
+                <div class="form-buttons">
+                    <a href="{{ url_for('customer_dashboard') }}" class="btn btn-outline">Go Back</a>
+                    <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %} 

@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Vehicle Details - GarageHub{% endblock %}
+
+{% block content %}
+<section class="content-section">
+    <div class="container">
+        <div class="section-header">
+            <h1>Vehicle Details</h1>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline">Back to Dashboard</a>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2>{{ vehicle.make }} {{ vehicle.model }} ({{ vehicle.year }})</h2>
+                <p>Owner: {{ vehicle.owner_name }}</p>
+            </div>
+            
+            <div class="card-body">
+                <div class="detail-row">
+                    <div class="detail-label">Make:</div>
+                    <div class="detail-value">{{ vehicle.make }}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Model:</div>
+                    <div class="detail-value">{{ vehicle.model }}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Year:</div>
+                    <div class="detail-value">{{ vehicle.year }}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">License Plate:</div>
+                    <div class="detail-value">{{ vehicle.license_plate }}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Owner:</div>
+                    <div class="detail-value">{{ vehicle.owner_name }}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Owner Email:</div>
+                    <div class="detail-value">{{ vehicle.owner_email }}</div>
+                </div>
+            </div>
+            
+            <div class="card-footer">
+                <a href="{{ url_for('admin_vehicle_history', vehicle_id=vehicle.id) }}" class="btn btn-primary">View Service History</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %} 

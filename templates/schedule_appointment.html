@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block title %}Schedule Appointment - GarageHub{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="auth-container animate-fade-in" style="max-width: 700px;">
+            <div class="auth-header">
+                <h2>Schedule a Service Appointment</h2>
+                <p>Select your vehicle, service, and preferred date and time.</p>
+            </div>
+            
+            <form action="{{ url_for('schedule_appointment') }}" method="POST">
+                <div class="form-group">
+                    <label for="vehicle_id" class="form-label">Select Vehicle</label>
+                    <select id="vehicle_id" name="vehicle_id" class="form-control" required>
+                        <option value="">-- Select Vehicle --</option>
+                        {% for vehicle in vehicles %}
+                            <option value="{{ vehicle.id }}" {% if request.args.get('vehicle_id')|int == vehicle.id %}selected{% endif %}>
+                                {{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }} ({{ vehicle.license_plate }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% if not vehicles %}
+                        <small style="display: block; margin-top: 0.5rem; color: #666;">
+                            No vehicles found. <a href="{{ url_for('add_vehicle') }}">Add a vehicle</a> first.
+                        </small>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="service_id" class="form-label">Select Service</label>
+                    <select id="service_id" name="service_id" class="form-control" required>
+                        <option value="">-- Select Service --</option>
+                        {% for service in services %}
+                            <option value="{{ service.id }}" {% if request.args.get('service_id')|int == service.id %}selected{% endif %}>
+                                {{ service.name }} - ₹{{ service.price }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="appointment_date" class="form-label">Preferred Date</label>
+                        <input type="date" id="appointment_date" name="appointment_date" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="appointment_time" class="form-label">Preferred Time</label>
+                        <input type="time" id="appointment_time" name="appointment_time" class="form-control" required>
+                        <small style="display: block; margin-top: 0.5rem; color: #666;">
+                            Business hours: 8:00 AM - 6:00 PM
+                        </small>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="notes" class="form-label">Additional Notes (Optional)</label>
+                    <textarea id="notes" name="notes" class="form-control" rows="4" placeholder="Please provide any additional details about your service needs or concerns."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <h3 style="font-size: 1.2rem; margin-bottom: 1rem;">Service Details</h3>
+                    <div id="service-details" style="background-color: #f9f9f9; padding: 1rem; border-radius: 4px; margin-bottom: 1rem;">
+                        <p>Select a service to see details.</p>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <a href="{{ url_for('customer_dashboard') }}" class="btn btn-outline" style="flex: 1;">Cancel</a>
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Schedule Appointment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Hidden service data for JavaScript -->
+<div id="service-data" style="display: none;" 
+    data-services="{{ services|map(attribute='id')|list|tojson }}"
+    data-names="{{ services|map(attribute='name')|list|tojson }}"
+    data-descriptions="{{ services|map(attribute='description')|list|tojson }}"
+    data-prices="{{ services|map(attribute='price')|list|tojson }}">
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const serviceSelect = document.getElementById('service_id');
+        const serviceDetails = document.getElementById('service-details');
+        
+        // Get service data from hidden element
+        const serviceDataElement = document.getElementById('service-data');
+        const serviceIds = JSON.parse(serviceDataElement.dataset.services || '[]');
+        const serviceNames = JSON.parse(serviceDataElement.dataset.names || '[]');
+        const serviceDescriptions = JSON.parse(serviceDataElement.dataset.descriptions || '[]');
+        const servicePrices = JSON.parse(serviceDataElement.dataset.prices || '[]');
+        
+        // Create service data object
+        const servicesData = {};
+        for (let i = 0; i < serviceIds.length; i++) {
+            let duration = '1 hour'; // Default duration
+            
+            // Set specific durations based on service name
+            if (serviceNames[i] === 'Oil Change') {
+                duration = '30 minutes';
+            } else if (serviceNames[i] === 'Brake Service') {
+                duration = '2 hours';
+            } else if (serviceNames[i] === 'Tire Rotation') {
+                duration = '45 minutes';
+            } else if (serviceNames[i] === 'Engine Tune-up') {
+                duration = '3 hours';
+            } else if (serviceNames[i] === 'AC Service') {
+                duration = '1.5 hours';
+            }
+            
+            servicesData[serviceIds[i]] = {
+                name: serviceNames[i],
+                description: serviceDescriptions[i],
+                price: servicePrices[i],
+                duration: duration
+            };
+        }
+        
+        // Update service details when service is selected
+        serviceSelect.addEventListener('change', function() {
+            const serviceId = this.value;
+            
+            if (serviceId && servicesData[serviceId]) {
+                const service = servicesData[serviceId];
+                serviceDetails.innerHTML = `
+                    <h4 style="margin-bottom: 0.5rem;">${service.name}</h4>
+                    <p>${service.description}</p>
+                    <p><strong>Price:</strong> ₹${service.price}</p>
+                    <p><strong>Estimated Duration:</strong> ${service.duration}</p>
+                `;
+            } else {
+                serviceDetails.innerHTML = '<p>Select a service to see details.</p>';
+            }
+        });
+        
+        // Set min date to today for the date picker
+        const dateInput = document.getElementById('appointment_date');
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.setAttribute('min', today);
+        
+        // Handle time input validation
+        const timeInput = document.getElementById('appointment_time');
+        timeInput.addEventListener('change', function() {
+            const timeValue = this.value;
+            const [hours, minutes] = timeValue.split(':').map(Number);
+            
+            // Restrict booking times between 8 AM and 6 PM
+            if (hours < 8 || hours >= 18) {
+                this.setCustomValidity('Please select a time between 8:00 AM and 6:00 PM');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+        
+        // Trigger change event if service is preselected from URL parameter
+        if (serviceSelect.value) {
+            serviceSelect.dispatchEvent(new Event('change'));
+        }
+    });
+</script>
+{% endblock %} 

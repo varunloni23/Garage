@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Services - GarageHub{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Manage Services</h1>
+            <p>Add, edit, or remove services offered by your garage.</p>
+        </div>
+        
+        <!-- Add Service Form -->
+        <div class="dashboard-content animate-fade-in" style="margin-bottom: 2rem;">
+            <h2 style="margin-bottom: 1.5rem;">Add New Service</h2>
+            
+            <form action="{{ url_for('manage_services') }}" method="POST">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="name" class="form-label">Service Name</label>
+                        <input type="text" id="name" name="name" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="price" class="form-label">Price ($)</label>
+                        <input type="number" id="price" name="price" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="duration" class="form-label">Duration (minutes)</label>
+                        <input type="number" id="duration" name="duration" class="form-control" min="15" step="15" value="60">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea id="description" name="description" class="form-control" rows="3" required></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Add Service</button>
+            </form>
+        </div>
+        
+        <!-- Services List -->
+        <div class="dashboard-content animate-fade-in">
+            <h2 style="margin-bottom: 1.5rem;">Current Services</h2>
+            
+            {% if services %}
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Service Name</th>
+                                <th>Description</th>
+                                <th>Price</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for service in services %}
+                                <tr>
+                                    <td>{{ service.id }}</td>
+                                    <td>{{ service.name }}</td>
+                                    <td>{{ service.description|truncate(50) }}</td>
+                                    <td>${{ service.price }}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-outline edit-btn" style="padding: 0.3rem 0.8rem; font-size: 0.9rem;" data-id="{{ service.id }}" data-name="{{ service.name }}" data-description="{{ service.description }}" data-price="{{ service.price }}">Edit</button>
+                                        <button type="button" class="btn btn-secondary delete-btn" style="padding: 0.3rem 0.8rem; font-size: 0.9rem;" data-id="{{ service.id }}" data-name="{{ service.name }}">Delete</button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 3rem 0;">
+                    <i class="fas fa-tools" style="font-size: 3rem; color: #ddd; margin-bottom: 1rem;"></i>
+                    <h3>No Services Added Yet</h3>
+                    <p>Add your first service using the form above.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Edit Service Modal -->
+<div id="edit-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1001;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 2rem; border-radius: 8px; width: 90%; max-width: 600px;">
+        <h2 style="margin-bottom: 1.5rem;">Edit Service</h2>
+        
+        <form id="edit-form" action="{{ url_for('manage_services') }}" method="POST">
+            <input type="hidden" id="edit-id" name="edit_id">
+            
+            <div class="form-group">
+                <label for="edit-name" class="form-label">Service Name</label>
+                <input type="text" id="edit-name" name="edit_name" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="edit-price" class="form-label">Price ($)</label>
+                <input type="number" id="edit-price" name="edit_price" class="form-control" step="0.01" min="0" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="edit-description" class="form-label">Description</label>
+                <textarea id="edit-description" name="edit_description" class="form-control" rows="3" required></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="button" id="close-modal" class="btn btn-outline" style="flex: 1;">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Service Modal -->
+<div id="delete-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1001;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 2rem; border-radius: 8px; width: 90%; max-width: 500px; text-align: center;">
+        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #f44336; margin-bottom: 1rem;"></i>
+        <h2 style="margin-bottom: 1rem;">Delete Service</h2>
+        <p style="margin-bottom: 2rem;">Are you sure you want to delete the service "<span id="delete-service-name"></span>"? This action cannot be undone.</p>
+        
+        <form id="delete-form" action="{{ url_for('manage_services') }}" method="POST">
+            <input type="hidden" id="delete-id" name="delete_id">
+            
+            <div style="display: flex; gap: 1rem;">
+                <button type="button" id="close-delete-modal" class="btn btn-outline" style="flex: 1;">Cancel</button>
+                <button type="submit" class="btn btn-secondary" style="flex: 1;">Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Edit Service Modal
+        const editModal = document.getElementById('edit-modal');
+        const editButtons = document.querySelectorAll('.edit-btn');
+        const closeModalButton = document.getElementById('close-modal');
+        
+        // Delete Service Modal
+        const deleteModal = document.getElementById('delete-modal');
+        const deleteButtons = document.querySelectorAll('.delete-btn');
+        const closeDeleteModalButton = document.getElementById('close-delete-modal');
+        
+        // Open Edit Modal
+        editButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const name = this.getAttribute('data-name');
+                const description = this.getAttribute('data-description');
+                const price = this.getAttribute('data-price');
+                
+                document.getElementById('edit-id').value = id;
+                document.getElementById('edit-name').value = name;
+                document.getElementById('edit-description').value = description;
+                document.getElementById('edit-price').value = price;
+                
+                editModal.style.display = 'block';
+            });
+        });
+        
+        // Close Edit Modal
+        closeModalButton.addEventListener('click', function() {
+            editModal.style.display = 'none';
+        });
+        
+        // Open Delete Modal
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const name = this.getAttribute('data-name');
+                
+                document.getElementById('delete-id').value = id;
+                document.getElementById('delete-service-name').textContent = name;
+                
+                deleteModal.style.display = 'block';
+            });
+        });
+        
+        // Close Delete Modal
+        closeDeleteModalButton.addEventListener('click', function() {
+            deleteModal.style.display = 'none';
+        });
+        
+        // Close modals when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === editModal) {
+                editModal.style.display = 'none';
+            }
+            if (event.target === deleteModal) {
+                deleteModal.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %} 

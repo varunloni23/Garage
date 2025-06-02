@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}Customer Dashboard - GarageHub{% endblock %}
+
+{% block content %}
+<section class="dashboard">
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Customer Dashboard</h1>
+            <p>Welcome, {{ session.user_name }}! Manage your vehicles, appointments, and services all in one place.</p>
+        </div>
+        
+        <!-- Dashboard Stats -->
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <h3>Your Vehicles</h3>
+                <div class="stat-value">{{ vehicles|length }}</div>
+            </div>
+            
+            <div class="stat-card">
+                <h3>Upcoming Appointments</h3>
+                <div class="stat-value">{{ appointments|selectattr('status', 'in', ['pending', 'confirmed'])|list|length }}</div>
+            </div>
+            
+            <div class="stat-card">
+                <h3>Completed Services</h3>
+                <div class="stat-value">{{ appointments|selectattr('status', 'equalto', 'completed')|list|length }}</div>
+            </div>
+            
+            <div class="stat-card">
+                <h3>Available Services</h3>
+                <div class="stat-value">{{ services|length }}</div>
+            </div>
+        </div>
+        
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="vehicles-tab">My Vehicles</button>
+                <button class="tab-btn" data-tab="appointments-tab">Appointments</button>
+                <button class="tab-btn" data-tab="services-tab">Available Services</button>
+            </div>
+            
+            <!-- Vehicles Tab -->
+            <div id="vehicles-tab" class="tab-content active">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2>My Vehicles</h2>
+                    <a href="{{ url_for('add_vehicle') }}" class="btn btn-primary">Add New Vehicle</a>
+                </div>
+                
+                {% if vehicles %}
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Make</th>
+                                    <th>Model</th>
+                                    <th>Year</th>
+                                    <th>License Plate</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for vehicle in vehicles %}
+                                    <tr>
+                                        <td>{{ vehicle.make }}</td>
+                                        <td>{{ vehicle.model }}</td>
+                                        <td>{{ vehicle.year }}</td>
+                                        <td>{{ vehicle.license_plate }}</td>
+                                        <td>
+                                            <a href="{{ url_for('edit_vehicle', vehicle_id=vehicle.id) }}" class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.9rem;">Edit</a>
+                                            <a href="{{ url_for('schedule_appointment') }}?vehicle_id={{ vehicle.id }}" class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.9rem;">Schedule Service</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div style="text-align: center; padding: 3rem 0;">
+                        <i class="fas fa-car" style="font-size: 3rem; color: #ddd; margin-bottom: 1rem;"></i>
+                        <h3>No Vehicles Added Yet</h3>
+                        <p>Add your first vehicle to schedule services and track maintenance.</p>
+                        <a href="{{ url_for('add_vehicle') }}" class="btn btn-primary" style="margin-top: 1rem;">Add Vehicle</a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Appointments Tab -->
+            <div id="appointments-tab" class="tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2>My Appointments</h2>
+                    <a href="{{ url_for('schedule_appointment') }}" class="btn btn-primary">Schedule New Appointment</a>
+                </div>
+                
+                {% if appointments %}
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Service</th>
+                                    <th>Vehicle</th>
+                                    <th>Date & Time</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in appointments %}
+                                    <tr>
+                                        <td>{{ appointment.service_name }}</td>
+                                        <td>{{ appointment.make }} {{ appointment.model }}</td>
+                                        <td>{{ appointment.appointment_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>
+                                            {% if appointment.status == 'pending' %}
+                                                <span style="color: #ff9800; font-weight: 600;">Pending</span>
+                                            {% elif appointment.status == 'confirmed' %}
+                                                <span style="color: #2196f3; font-weight: 600;">Confirmed</span>
+                                            {% elif appointment.status == 'completed' %}
+                                                <span style="color: #4caf50; font-weight: 600;">Completed</span>
+                                            {% elif appointment.status == 'cancelled' %}
+                                                <span style="color: #f44336; font-weight: 600;">Cancelled</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if appointment.status in ['pending', 'confirmed'] %}
+                                                <a href="{{ url_for('reschedule_appointment', appointment_id=appointment.id) }}" class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.9rem;">Reschedule</a>
+                                                <a href="{{ url_for('cancel_appointment', appointment_id=appointment.id) }}" class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.9rem;">Cancel</a>
+                                            {% else %}
+                                                <a href="{{ url_for('appointment_details', appointment_id=appointment.id) }}" class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.9rem;">View Details</a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div style="text-align: center; padding: 3rem 0;">
+                        <i class="fas fa-calendar-alt" style="font-size: 3rem; color: #ddd; margin-bottom: 1rem;"></i>
+                        <h3>No Appointments Scheduled</h3>
+                        <p>Schedule your first service appointment to keep your vehicle in top condition.</p>
+                        <a href="{{ url_for('schedule_appointment') }}" class="btn btn-primary" style="margin-top: 1rem;">Schedule Appointment</a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Services Tab -->
+            <div id="services-tab" class="tab-content">
+                <div style="margin-bottom: 1.5rem;">
+                    <h2>Available Services</h2>
+                    <p>Browse our comprehensive range of automotive services.</p>
+                </div>
+                
+                <div class="services-grid">
+                    {% for service in services %}
+                        <div class="service-card">
+                            <div class="service-content">
+                                <h3>{{ service.name }}</h3>
+                                <p>{{ service.description }}</p>
+                                <div class="service-price">${{ service.price }}</div>
+                                <a href="{{ url_for('schedule_appointment') }}?service_id={{ service.id }}" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Schedule This Service</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons and contents
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                // Add active class to current button
+                button.classList.add('active');
+                
+                // Show corresponding content
+                const tabId = button.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+    });
+</script>
+{% endblock %} 

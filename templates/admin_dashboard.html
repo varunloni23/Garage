@@ -1,0 +1,309 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - GarageHub{% endblock %}
+
+{% block content %}
+<section class="dashboard">
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Admin Dashboard</h1>
+            <p>Manage services, appointments, vehicles, and customers.</p>
+        </div>
+        
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="appointments-tab">Appointments</button>
+                <button class="tab-btn" data-tab="services-tab">Services</button>
+                <button class="tab-btn" data-tab="vehicles-tab">Vehicles</button>
+                <button class="tab-btn" data-tab="customers-tab">Customers</button>
+                <button class="tab-btn" data-tab="products-tab">Products</button>
+            </div>
+            
+            <!-- Appointments Tab -->
+            <div id="appointments-tab" class="tab-content active">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2>Manage Appointments</h2>
+                    <a href="{{ url_for('admin_schedule_appointment') }}" class="btn btn-primary">Add New Appointment</a>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <input type="text" placeholder="Search appointments..." class="form-control" style="width: 100%; padding: 0.8rem;">
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Customer</th>
+                                <th>Service</th>
+                                <th>Vehicle</th>
+                                <th>Date & Time</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for appointment in appointments %}
+                                <tr>
+                                    <td>{{ appointment.id }}</td>
+                                    <td>{{ appointment.customer_name }}</td>
+                                    <td>{{ appointment.service_name }}</td>
+                                    <td>{{ appointment.make }} {{ appointment.model }}</td>
+                                    <td>{{ appointment.appointment_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>
+                                        <form action="{{ url_for('admin_update_appointment_status', appointment_id=appointment.id) }}" method="POST" style="margin: 0;">
+                                            <select class="form-control" name="status" onchange="this.form.submit()" style="padding: 0.3rem; width: auto;">
+                                                <option value="pending" {% if appointment.status == 'pending' %}selected{% endif %}>Pending</option>
+                                                <option value="confirmed" {% if appointment.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                                                <option value="completed" {% if appointment.status == 'completed' %}selected{% endif %}>Completed</option>
+                                                <option value="cancelled" {% if appointment.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                                            </select>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('admin_view_appointment', appointment_id=appointment.id) }}" class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.9rem;">VIEW</a>
+                                        <a href="{{ url_for('admin_edit_appointment', appointment_id=appointment.id) }}" class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.9rem;">EDIT</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        Showing <span style="font-weight: 600;">1-10</span> of <span style="font-weight: 600;">{{ appointments|length }}</span> appointments
+                    </div>
+                    <div>
+                        <button class="btn btn-outline" style="padding: 0.3rem 0.8rem; margin-right: 0.5rem;">Previous</button>
+                        <button class="btn btn-outline" style="padding: 0.3rem 0.8rem;">Next</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Services Tab -->
+            <div id="services-tab" class="tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2>Manage Services</h2>
+                    <a href="{{ url_for('manage_services') }}" class="btn btn-primary">Add New Service</a>
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Service Name</th>
+                                <th>Description</th>
+                                <th>Price</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for service in services %}
+                                <tr>
+                                    <td>{{ service.id }}</td>
+                                    <td>{{ service.name }}</td>
+                                    <td>{{ service.description|truncate(50) }}</td>
+                                    <td>₹{{ service.price }}</td>
+                                    <td>
+                                        <a href="{{ url_for('admin_view_service', service_id=service.id) }}" class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.9rem;">VIEW</a>
+                                        <a href="{{ url_for('admin_delete_service', service_id=service.id) }}" class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.9rem;">DELETE</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Vehicles Tab -->
+            <div id="vehicles-tab" class="tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2>Registered Vehicles</h2>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <input type="text" placeholder="Search vehicles..." class="form-control" style="width: 100%; padding: 0.8rem;">
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Owner</th>
+                                <th>Make</th>
+                                <th>Model</th>
+                                <th>Year</th>
+                                <th>License Plate</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vehicle in vehicles %}
+                                <tr>
+                                    <td>{{ vehicle.id }}</td>
+                                    <td>{{ vehicle.owner_name }}</td>
+                                    <td>{{ vehicle.make }}</td>
+                                    <td>{{ vehicle.model }}</td>
+                                    <td>{{ vehicle.year }}</td>
+                                    <td>{{ vehicle.license_plate }}</td>
+                                    <td>
+                                        <a href="{{ url_for('admin_view_vehicle', vehicle_id=vehicle.id) }}" class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.9rem;">VIEW</a>
+                                        <a href="{{ url_for('admin_vehicle_history', vehicle_id=vehicle.id) }}" class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.9rem;">HISTORY</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        Showing <span style="font-weight: 600;">1-10</span> of <span style="font-weight: 600;">{{ vehicles|length }}</span> vehicles
+                    </div>
+                    <div>
+                        <button class="btn btn-outline" style="padding: 0.3rem 0.8rem; margin-right: 0.5rem;">Previous</button>
+                        <button class="btn btn-outline" style="padding: 0.3rem 0.8rem;">Next</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Customers Tab -->
+            <div id="customers-tab" class="tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2>Manage Customers</h2>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <input type="text" placeholder="Search customers..." class="form-control" style="width: 100%; padding: 0.8rem;">
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Vehicles</th>
+                                <th>Appointments</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for customer in customers %}
+                                <tr>
+                                    <td>{{ customer.id }}</td>
+                                    <td>{{ customer.name }}</td>
+                                    <td>{{ customer.email }}</td>
+                                    <td>{{ customer.vehicle_count }}</td>
+                                    <td>{{ customer.appointment_count }}</td>
+                                    <td>
+                                        <a href="{{ url_for('admin_view_customer', customer_id=customer.id) }}" class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.9rem;">VIEW</a>
+                                        <a href="{{ url_for('admin_edit_customer', customer_id=customer.id) }}" class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.9rem;">EDIT</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        Showing <span style="font-weight: 600;">1-10</span> of <span style="font-weight: 600;">{{ customers|length }}</span> customers
+                    </div>
+                    <div>
+                        <button class="btn btn-outline" style="padding: 0.3rem 0.8rem; margin-right: 0.5rem;">Previous</button>
+                        <button class="btn btn-outline" style="padding: 0.3rem 0.8rem;">Next</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Products Tab -->
+            <div id="products-tab" class="tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2>Manage Products</h2>
+                    <a href="{{ url_for('admin_add_product') }}" class="btn btn-primary">Add New Product</a>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <input type="text" placeholder="Search products..." class="form-control" style="width: 100%; padding: 0.8rem;">
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in products %}
+                                <tr>
+                                    <td>{{ product.id }}</td>
+                                    <td>
+                                        <img src="{{ product.image_url }}" alt="{{ product.name }}" style="width: 50px; height: 50px; object-fit: cover;">
+                                        <a href="{{ url_for('admin_upload_product_image', product_id=product.id) }}" class="btn btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.8rem; margin-left: 0.5rem;">Upload</a>
+                                    </td>
+                                    <td>{{ product.name }}</td>
+                                    <td>{{ product.description|truncate(30) }}</td>
+                                    <td>₹{{ product.price }}</td>
+                                    <td>{{ product.stock }}</td>
+                                    <td>
+                                        <a href="{{ url_for('admin_edit_product', product_id=product.id) }}" class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.9rem;">EDIT</a>
+                                        <a href="{{ url_for('admin_delete_product', product_id=product.id) }}" class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.9rem;">DELETE</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        Showing <span style="font-weight: 600;">1-10</span> of <span style="font-weight: 600;">{{ products|length }}</span> products
+                    </div>
+                    <div>
+                        <button class="btn btn-outline" style="padding: 0.3rem 0.8rem; margin-right: 0.5rem;">Previous</button>
+                        <button class="btn btn-outline" style="padding: 0.3rem 0.8rem;">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons and contents
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                // Add active class to current button
+                button.classList.add('active');
+                
+                // Show corresponding content
+                const tabId = button.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+    });
+</script>
+{% endblock %} 

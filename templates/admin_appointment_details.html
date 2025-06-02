@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Appointment Details - GarageHub Admin{% endblock %}
+
+{% block content %}
+<section class="form-section">
+    <div class="container">
+        <div class="form-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2>Appointment Details</h2>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline">Back to Dashboard</a>
+            </div>
+            
+            <div class="appointment-details">
+                <div class="detail-section">
+                    <h3>Customer Information</h3>
+                    <p><strong>Name:</strong> {{ appointment.customer_name }}</p>
+                    <p><strong>Email:</strong> {{ appointment.customer_email }}</p>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>Service Information</h3>
+                    <p><strong>Service:</strong> {{ appointment.service_name }}</p>
+                    <p><strong>Description:</strong> {{ appointment.service_description }}</p>
+                    <p><strong>Price:</strong> ${{ appointment.service_price }}</p>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>Vehicle Information</h3>
+                    <p><strong>Make:</strong> {{ appointment.make }}</p>
+                    <p><strong>Model:</strong> {{ appointment.model }}</p>
+                    <p><strong>Year:</strong> {{ appointment.year }}</p>
+                    <p><strong>License Plate:</strong> {{ appointment.license_plate }}</p>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>Appointment Information</h3>
+                    <p><strong>Date & Time:</strong> {{ appointment.appointment_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                    <p><strong>Status:</strong> 
+                        {% if appointment.status == 'pending' %}
+                            <span style="color: #ff9800; font-weight: 600;">Pending</span>
+                        {% elif appointment.status == 'confirmed' %}
+                            <span style="color: #2196f3; font-weight: 600;">Confirmed</span>
+                        {% elif appointment.status == 'completed' %}
+                            <span style="color: #4caf50; font-weight: 600;">Completed</span>
+                        {% elif appointment.status == 'cancelled' %}
+                            <span style="color: #f44336; font-weight: 600;">Cancelled</span>
+                        {% endif %}
+                    </p>
+                    {% if appointment.notes %}
+                        <p><strong>Notes:</strong> {{ appointment.notes }}</p>
+                    {% endif %}
+                    <p><strong>Created:</strong> {{ appointment.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                </div>
+            </div>
+            
+            <div class="form-buttons">
+                <a href="{{ url_for('admin_edit_appointment', appointment_id=appointment.id) }}" class="btn btn-primary">Edit Appointment</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .appointment-details {
+        margin-bottom: 2rem;
+    }
+    .detail-section {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+    .detail-section:last-child {
+        border-bottom: none;
+    }
+    .detail-section h3 {
+        margin-bottom: 0.8rem;
+        color: #2c3e50;
+    }
+</style>
+{% endblock %} 

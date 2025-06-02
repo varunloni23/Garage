@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Service Details - GarageHub{% endblock %}
+
+{% block content %}
+<section class="content-section">
+    <div class="container">
+        <div class="section-header">
+            <h1>Service Details</h1>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline">Back to Dashboard</a>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2>{{ service.name }}</h2>
+                <p>Price: ${{ service.price }}</p>
+            </div>
+            
+            <div class="card-body">
+                <div class="detail-row">
+                    <div class="detail-label">Service ID:</div>
+                    <div class="detail-value">{{ service.id }}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Name:</div>
+                    <div class="detail-value">{{ service.name }}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Price:</div>
+                    <div class="detail-value">${{ service.price }}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Description:</div>
+                    <div class="detail-value">{{ service.description }}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Appointments:</div>
+                    <div class="detail-value">{{ appointment_count }} appointment(s) using this service</div>
+                </div>
+            </div>
+            
+            <div class="card-footer">
+                <a href="{{ url_for('admin_edit_service', service_id=service.id) }}" class="btn btn-primary">Edit Service</a>
+                <a href="{{ url_for('admin_delete_service', service_id=service.id) }}" class="btn btn-danger">Delete Service</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %} 

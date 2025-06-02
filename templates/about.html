@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}About Us - GarageHub{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="section" style="background-color: var(--primary); color: var(--white); padding: 4rem 0;">
+    <div class="container">
+        <h1 class="animate-fade-in" style="color: var(--white); font-size: 3rem; margin-bottom: 1rem;">About Us</h1>
+        <p class="animate-fade-in" style="max-width: 700px; font-size: 1.2rem;">
+            Learn about our story, our mission, and the team behind GarageHub's exceptional automotive services.
+        </p>
+    </div>
+</section>
+
+<!-- Our Story Section -->
+<section class="section">
+    <div class="container">
+        <div class="about-content">
+            <div class="about-text animate-fade-in">
+                <h2 class="section-title" style="text-align: left;">Our Story</h2>
+                <p>
+                    Founded in 2005, GarageHub began with a simple mission: to provide honest, high-quality automotive services at fair prices. What started as a small, family-owned garage has grown into a trusted name in automotive care, serving thousands of satisfied customers.
+                </p>
+                <p style="margin-top: 1rem;">
+                    Our founder, Michael Roberts, had spent over 20 years working as a mechanic at various dealerships and repair shops before deciding to open his own business. Frustrated by the industry's focus on quick profits over quality service, he envisioned a garage where transparency, expertise, and customer satisfaction would be the top priorities.
+                </p>
+                <p style="margin-top: 1rem;">
+                    Today, GarageHub continues to uphold these values while embracing modern technology and techniques to provide the best possible service for all types of vehicles.
+                </p>
+            </div>
+            <div class="about-image animate-fade-in delay-200">
+                <img src="{{ url_for('static', filename='images/garage-history.jpg') }}" alt="GarageHub History">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Our Mission Section -->
+<section class="section" style="background-color: var(--light-bg);">
+    <div class="container">
+        <h2 class="section-title animate-fade-in">Our Mission</h2>
+        <div class="about-content" style="flex-direction: row-reverse;">
+            <div class="about-text animate-fade-in">
+                <p>
+                    At GarageHub, our mission is to provide exceptional automotive care through technical excellence, honest communication, and outstanding customer service.
+                </p>
+                <p style="margin-top: 1rem;">
+                    We believe that every customer deserves:
+                </p>
+                <ul style="margin: 1rem 0 1rem 1.5rem;">
+                    <li>Clear explanations of their vehicle's condition</li>
+                    <li>Transparent pricing with no hidden fees</li>
+                    <li>Quality repairs using the best parts and techniques</li>
+                    <li>Respectful service from knowledgeable professionals</li>
+                    <li>A commitment to vehicle safety and reliability</li>
+                </ul>
+                <p>
+                    We strive to build long-term relationships with our customers by earning their trust through every interaction and service we provide.
+                </p>
+            </div>
+            <div class="about-image animate-fade-in delay-200">
+                <img src="{{ url_for('static', filename='images/garage-mission.jpg') }}" alt="Our Mission">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Our Team Section -->
+<section class="section">
+    <div class="container">
+        <h2 class="section-title animate-fade-in">Meet Our Team</h2>
+        <p class="text-center animate-fade-in" style="max-width: 700px; margin: 0 auto 3rem;">
+            Our team of certified technicians brings decades of combined experience to every job. We're passionate about cars and committed to providing the best service possible.
+        </p>
+        
+        <div class="services-grid">
+            <div class="service-card animate-fade-in delay-100">
+                <div class="service-image" style="height: 300px;">
+                    <img src="{{ url_for('static', filename='images/team-member1.jpg') }}" alt="Team Member">
+                </div>
+                <div class="service-content text-center">
+                    <h3>Michael Roberts</h3>
+                    <p style="color: var(--secondary); font-weight: 600; margin-bottom: 1rem;">Founder & Master Technician</p>
+                    <p>
+                        With over 30 years of experience, Michael leads our team with unparalleled expertise in all aspects of automotive repair and maintenance.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="service-card animate-fade-in delay-200">
+                <div class="service-image" style="height: 300px;">
+                    <img src="{{ url_for('static', filename='images/team-member2.jpg') }}" alt="Team Member">
+                </div>
+                <div class="service-content text-center">
+                    <h3>Jennifer Lee</h3>
+                    <p style="color: var(--secondary); font-weight: 600; margin-bottom: 1rem;">Service Manager</p>
+                    <p>
+                        Jennifer ensures that every customer receives exceptional service and that all repairs are completed to the highest standards.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="service-card animate-fade-in delay-300">
+                <div class="service-image" style="height: 300px;">
+                    <img src="{{ url_for('static', filename='images/team-member3.jpg') }}" alt="Team Member">
+                </div>
+                <div class="service-content text-center">
+                    <h3>David Wilson</h3>
+                    <p style="color: var(--secondary); font-weight: 600; margin-bottom: 1rem;">Diagnostic Specialist</p>
+                    <p>
+                        David specializes in advanced diagnostics, using the latest technology to identify and solve complex automotive issues.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Our Facilities Section -->
+<section class="section" style="background-color: var(--light-bg);">
+    <div class="container">
+        <h2 class="section-title animate-fade-in">Our Facilities</h2>
+        <p class="text-center animate-fade-in" style="max-width: 700px; margin: 0 auto 3rem;">
+            Our modern, well-equipped facility is designed to handle all types of automotive services, from routine maintenance to complex repairs.
+        </p>
+        
+        <div class="services-grid">
+            <div class="service-card animate-fade-in delay-100">
+                <div class="service-image">
+                    <img src="{{ url_for('static', filename='images/facility1.jpg') }}" alt="Facility">
+                </div>
+                <div class="service-content">
+                    <h3>State-of-the-Art Equipment</h3>
+                    <p>
+                        We invest in the latest diagnostic and repair equipment to ensure accurate and efficient service for all vehicle makes and models.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="service-card animate-fade-in delay-200">
+                <div class="service-image">
+                    <img src="{{ url_for('static', filename='images/facility2.jpg') }}" alt="Facility">
+                </div>
+                <div class="service-content">
+                    <h3>Comfortable Waiting Area</h3>
+                    <p>
+                        Our customer lounge features comfortable seating, complimentary Wi-Fi, fresh coffee, and a clean environment for your convenience.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="service-card animate-fade-in delay-300">
+                <div class="service-image">
+                    <img src="{{ url_for('static', filename='images/facility3.jpg') }}" alt="Facility">
+                </div>
+                <div class="service-content">
+                    <h3>Multiple Service Bays</h3>
+                    <p>
+                        With multiple service bays and lifts, we can efficiently handle multiple vehicles at once while maintaining our high standards of service.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="section" style="background-color: var(--primary); color: var(--white); text-align: center;">
+    <div class="container">
+        <h2 class="section-title animate-fade-in" style="color: var(--white);">Experience the GarageHub Difference</h2>
+        <p class="animate-fade-in" style="max-width: 700px; margin: 0 auto 2rem; font-size: 1.1rem;">
+            Join thousands of satisfied customers who trust us with their vehicles. Schedule an appointment today and see why we're the preferred choice for automotive care.
+        </p>
+        <div class="animate-fade-in">
+            <a href="{{ url_for('services') }}" class="btn btn-secondary" style="margin-right: 1rem;">Our Services</a>
+            <a href="{{ url_for('contact') }}" class="btn btn-outline" style="border-color: var(--white); color: var(--white);">Contact Us</a>
+        </div>
+    </div>
+</section>
+{% endblock %} 

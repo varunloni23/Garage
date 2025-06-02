@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Vehicle Service History - GarageHub{% endblock %}
+
+{% block content %}
+<section class="content-section">
+    <div class="container">
+        <div class="section-header">
+            <h1>Service History</h1>
+            <a href="{{ url_for('admin_view_vehicle', vehicle_id=vehicle.id) }}" class="btn btn-outline">Back to Vehicle Details</a>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2>{{ vehicle.make }} {{ vehicle.model }} ({{ vehicle.year }})</h2>
+                <p>Owner: {{ vehicle.owner_name }}</p>
+            </div>
+            
+            <div class="card-body">
+                {% if appointments %}
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Service</th>
+                                    <th>Price</th>
+                                    <th>Status</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in appointments %}
+                                    <tr>
+                                        <td>{{ appointment.appointment_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>{{ appointment.service_name }}</td>
+                                        <td>${{ appointment.service_price }}</td>
+                                        <td>{{ appointment.status|capitalize }}</td>
+                                        <td>{{ appointment.notes or '-' }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p>No service history found for this vehicle.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %} 
