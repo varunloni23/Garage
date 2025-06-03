@@ -13,7 +13,7 @@ class Config:
     # Database settings
     DB_HOST = os.environ.get('DB_HOST') or 'localhost'
     DB_USER = os.environ.get('DB_USER') or 'root'
-    DB_PASSWORD = os.environ.get('MYSQL_PASSWORD') or 'Varunloni@12'
+    DB_PASSWORD = os.environ.get('DB_PASSWORD') or ''
     DB_NAME = os.environ.get('DB_NAME') or 'garage_management'
 
 class DevelopmentConfig(Config):

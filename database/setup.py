@@ -4,11 +4,12 @@ from werkzeug.security import generate_password_hash
 from datetime import datetime, timedelta
 import os
 import getpass
-from .config import get_config
+from .db import DatabaseConfig
 
 def create_database():
     """Create the database if it doesn't exist"""
-    config = get_config()
+    env = os.environ.get('FLASK_ENV') or 'development'
+    config = DatabaseConfig.get_config(env)
     
     try:
         # Connect to MySQL server without specifying a database
@@ -33,7 +34,8 @@ def create_database():
 
 def create_tables():
     """Create all necessary tables for the garage management system"""
-    config = get_config()
+    env = os.environ.get('FLASK_ENV') or 'development'
+    config = DatabaseConfig.get_config(env)
     
     try:
         # Connect to the database
@@ -151,7 +153,8 @@ def create_tables():
 
 def insert_sample_data():
     """Insert sample data into the database"""
-    config = get_config()
+    env = os.environ.get('FLASK_ENV') or 'development'
+    config = DatabaseConfig.get_config(env)
     
     try:
         # Connect to the database
@@ -241,7 +244,7 @@ def setup_database():
     create_database()
     create_tables()
     insert_sample_data()
-    print("Database setup completed successfully.")
+    print("Database setup complete.")
 
 if __name__ == "__main__":
     setup_database() 
