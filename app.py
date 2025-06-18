@@ -28,6 +28,21 @@ def allowed_file(filename):
 def inject_now():
     return {'now': datetime.now()}
 
+# Context processor to add cart count to all templates
+@app.context_processor
+def inject_cart_count():
+    cart_count = 0
+    if 'user_id' in session:
+        user_id = session['user_id']
+        result = execute_query(
+            'SELECT COUNT(*) as count FROM cart_items WHERE user_id = %s',
+            (user_id,),
+            fetch=True
+        )
+        if result and result[0]['count']:
+            cart_count = result[0]['count']
+    return {'cart_count': cart_count}
+
 # Routes
 @app.route('/')
 def home():
@@ -44,6 +59,11 @@ def services():
 @app.route('/products')
 def products():
     products_data = execute_query('SELECT * FROM products', fetch=True)
+    
+    # Check if products_data is None (database query failed)
+    if products_data is None:
+        flash('Unable to retrieve products. Please try again later.', 'danger')
+        products_data = []  # Initialize as empty list to avoid TypeError
     
     # Process image URLs for products
     for product in products_data:
@@ -80,15 +100,30 @@ def login():
         
         user = execute_query('SELECT * FROM users WHERE email = %s', (email,), fetch=True)
         
-        if user and len(user) > 0 and check_password_hash(user[0]['password'], password):
-            user = user[0]  # Get the first (and only) user
+        if user is None:
+            flash('Database connection error. Please try again later.', 'danger')
+            return render_template('login.html')
+        
+        if not user:
+            flash('No user found with this email address', 'danger')
+            return render_template('login.html')
+            
+        user = user[0]  # Get the first (and only) user
+        
+        # Debug information
+        if app.debug:
+            print(f"Login attempt for: {email}")
+            print(f"Password hash in DB: {user['password'][:20]}...")
+            print(f"Hash method used: {user['password'].split('$')[0]}")
+        
+        if check_password_hash(user['password'], password):
             session['user_id'] = user['id']
             session['user_name'] = user['name']
             session['user_role'] = user['role']
             flash('Login successful!', 'success')
             return redirect(url_for('dashboard'))
         else:
-            flash('Invalid email or password', 'danger')
+            flash('Invalid password', 'danger')
     
     return render_template('login.html')
 
@@ -98,16 +133,33 @@ def register():
         name = request.form['name']
         email = request.form['email']
         password = request.form['password']
+        confirm_password = request.form['confirm_password']
         role = 'customer'  # Default role
         
-        hashed_password = generate_password_hash(password)
+        # Validate password
+        if password != confirm_password:
+            flash('Passwords do not match', 'danger')
+            return render_template('register.html')
+        
+        # Check password length and complexity
+        if len(password) < 8:
+            flash('Password must be at least 8 characters long', 'danger')
+            return render_template('register.html')
+        
+        # Use scrypt method to match existing user password hashing
+        hashed_password = generate_password_hash(password, method='scrypt')
         
         try:
-            execute_query(
+            result = execute_query(
                 'INSERT INTO users (name, email, password, role) VALUES (%s, %s, %s, %s)',
                 (name, email, hashed_password, role),
                 commit=True
             )
+            
+            if result is None:
+                flash('Database connection error. Please try again later.', 'danger')
+                return render_template('register.html')
+                
             flash('Registration successful! Please login.', 'success')
             return redirect(url_for('login'))
         except mysql.connector.Error as err:
@@ -141,6 +193,9 @@ def admin_dashboard():
     
     # Get services
     services = execute_query('SELECT * FROM services', fetch=True)
+    if services is None:
+        services = []
+        flash('Unable to retrieve services data. Database connection error.', 'danger')
     
     # Get appointments
     appointments = execute_query('''
@@ -151,6 +206,9 @@ def admin_dashboard():
         JOIN vehicles v ON a.vehicle_id = v.id
         ORDER BY a.appointment_date DESC
     ''', fetch=True)
+    if appointments is None:
+        appointments = []
+        flash('Unable to retrieve appointments data. Database connection error.', 'danger')
     
     # Get vehicles
     vehicles = execute_query('''
@@ -158,6 +216,9 @@ def admin_dashboard():
         FROM vehicles v 
         JOIN users u ON v.user_id = u.id
     ''', fetch=True)
+    if vehicles is None:
+        vehicles = []
+        flash('Unable to retrieve vehicles data. Database connection error.', 'danger')
     
     # Get customers
     customers = execute_query('''
@@ -168,9 +229,15 @@ def admin_dashboard():
         WHERE u.role = 'customer'
         ORDER BY u.name
     ''', fetch=True)
+    if customers is None:
+        customers = []
+        flash('Unable to retrieve customers data. Database connection error.', 'danger')
     
     # Get products
     products = execute_query('SELECT * FROM products ORDER BY name', fetch=True)
+    if products is None:
+        products = []
+        flash('Unable to retrieve products data. Database connection error.', 'danger')
     
     # Process image URLs for products
     for product in products:
@@ -197,6 +264,9 @@ def customer_dashboard():
     
     # Get user's vehicles
     vehicles = execute_query('SELECT * FROM vehicles WHERE user_id = %s', (user_id,), fetch=True)
+    if vehicles is None:
+        vehicles = []
+        flash('Unable to retrieve vehicles data. Database connection error.', 'danger')
     
     # Get user's appointments
     appointments = execute_query('''
@@ -207,9 +277,15 @@ def customer_dashboard():
         WHERE a.user_id = %s
         ORDER BY a.appointment_date DESC
     ''', (user_id,), fetch=True)
+    if appointments is None:
+        appointments = []
+        flash('Unable to retrieve appointments data. Database connection error.', 'danger')
     
     # Get available services
     services = execute_query('SELECT * FROM services', fetch=True)
+    if services is None:
+        services = []
+        flash('Unable to retrieve services data. Database connection error.', 'danger')
     
     return render_template('customer_dashboard.html', 
                           vehicles=vehicles, 
@@ -1106,6 +1182,492 @@ def admin_upload_product_image(product_id):
             flash('Invalid file type. Allowed types: png, jpg, jpeg, gif', 'danger')
     
     return render_template('admin_upload_product_image.html', product=product)
+
+# Shopping Cart Routes
+@app.route('/cart')
+def view_cart():
+    if 'user_id' not in session:
+        flash('Please login to view your cart', 'warning')
+        return redirect(url_for('login'))
+    
+    user_id = session['user_id']
+    
+    # Get cart items with product details
+    cart_items = execute_query('''
+        SELECT c.id, c.product_id, c.quantity, p.name, p.description, p.price, p.stock, p.image_url,
+               (p.price * c.quantity) as subtotal
+        FROM cart_items c
+        JOIN products p ON c.product_id = p.id
+        WHERE c.user_id = %s
+    ''', (user_id,), fetch=True)
+    
+    if cart_items is None:
+        flash('Unable to retrieve cart items. Database connection error.', 'danger')
+        cart_items = []
+    
+    # Process image URLs for products
+    for item in cart_items:
+        if item['image_url']:
+            item['image_url'] = url_for('static', filename=item['image_url'])
+        else:
+            # Default image if none is set
+            item['image_url'] = url_for('static', filename='images/products/default-product.jpg')
+    
+    # Calculate cart total
+    cart_total = sum(item['subtotal'] for item in cart_items) if cart_items else 0
+    
+    return render_template('cart.html', cart_items=cart_items, cart_total=cart_total)
+
+@app.route('/cart/add/<int:product_id>', methods=['POST'])
+def add_to_cart(product_id):
+    if 'user_id' not in session:
+        flash('Please login to add items to your cart', 'warning')
+        return redirect(url_for('login'))
+    
+    user_id = session['user_id']
+    quantity = int(request.form.get('quantity', 1))
+    
+    # Check if product exists and has stock
+    product = execute_query('SELECT * FROM products WHERE id = %s', (product_id,), fetch=True)
+    
+    if not product:
+        flash('Product not found', 'danger')
+        return redirect(url_for('products'))
+    
+    product = product[0]  # Get the first (and only) product
+    
+    if product['stock'] < quantity:
+        flash(f'Sorry, only {product["stock"]} items available in stock', 'warning')
+        return redirect(url_for('products'))
+    
+    try:
+        # Check if product is already in cart
+        existing_item = execute_query(
+            'SELECT * FROM cart_items WHERE user_id = %s AND product_id = %s',
+            (user_id, product_id),
+            fetch=True
+        )
+        
+        if existing_item:
+            # Update quantity
+            new_quantity = existing_item[0]['quantity'] + quantity
+            if new_quantity > product['stock']:
+                new_quantity = product['stock']
+                flash(f'Cart updated to maximum available stock ({product["stock"]} items)', 'info')
+            
+            execute_query(
+                'UPDATE cart_items SET quantity = %s WHERE user_id = %s AND product_id = %s',
+                (new_quantity, user_id, product_id),
+                commit=True
+            )
+            flash('Cart updated successfully!', 'success')
+        else:
+            # Add new item to cart
+            execute_query(
+                'INSERT INTO cart_items (user_id, product_id, quantity) VALUES (%s, %s, %s)',
+                (user_id, product_id, quantity),
+                commit=True
+            )
+            flash('Product added to cart!', 'success')
+        
+        return redirect(url_for('view_cart'))
+    except mysql.connector.Error as err:
+        flash(f'Failed to add product to cart: {err}', 'danger')
+        return redirect(url_for('products'))
+
+@app.route('/cart/update/<int:cart_item_id>', methods=['POST'])
+def update_cart_item(cart_item_id):
+    if 'user_id' not in session:
+        flash('Please login to update your cart', 'warning')
+        return redirect(url_for('login'))
+    
+    user_id = session['user_id']
+    quantity = int(request.form.get('quantity', 1))
+    
+    # Check if cart item exists and belongs to the user
+    cart_item = execute_query(
+        'SELECT c.*, p.stock FROM cart_items c JOIN products p ON c.product_id = p.id WHERE c.id = %s AND c.user_id = %s',
+        (cart_item_id, user_id),
+        fetch=True
+    )
+    
+    if not cart_item:
+        flash('Cart item not found', 'danger')
+        return redirect(url_for('view_cart'))
+    
+    cart_item = cart_item[0]  # Get the first (and only) cart item
+    
+    # Validate quantity
+    if quantity <= 0:
+        # Remove item if quantity is 0 or negative
+        execute_query('DELETE FROM cart_items WHERE id = %s', (cart_item_id,), commit=True)
+        flash('Item removed from cart', 'success')
+    else:
+        # Check stock availability
+        if quantity > cart_item['stock']:
+            quantity = cart_item['stock']
+            flash(f'Quantity adjusted to maximum available stock ({cart_item["stock"]} items)', 'info')
+        
+        # Update quantity
+        execute_query(
+            'UPDATE cart_items SET quantity = %s WHERE id = %s',
+            (quantity, cart_item_id),
+            commit=True
+        )
+        flash('Cart updated successfully!', 'success')
+    
+    return redirect(url_for('view_cart'))
+
+@app.route('/cart/remove/<int:cart_item_id>')
+def remove_from_cart(cart_item_id):
+    if 'user_id' not in session:
+        flash('Please login to manage your cart', 'warning')
+        return redirect(url_for('login'))
+    
+    user_id = session['user_id']
+    
+    # Check if cart item exists and belongs to the user
+    cart_item = execute_query(
+        'SELECT * FROM cart_items WHERE id = %s AND user_id = %s',
+        (cart_item_id, user_id),
+        fetch=True
+    )
+    
+    if not cart_item:
+        flash('Cart item not found', 'danger')
+        return redirect(url_for('view_cart'))
+    
+    # Remove the item
+    execute_query('DELETE FROM cart_items WHERE id = %s', (cart_item_id,), commit=True)
+    flash('Item removed from cart', 'success')
+    
+    return redirect(url_for('view_cart'))
+
+@app.route('/cart/clear')
+def clear_cart():
+    if 'user_id' not in session:
+        flash('Please login to manage your cart', 'warning')
+        return redirect(url_for('login'))
+    
+    user_id = session['user_id']
+    
+    # Remove all items from the user's cart
+    execute_query('DELETE FROM cart_items WHERE user_id = %s', (user_id,), commit=True)
+    flash('Cart cleared successfully!', 'success')
+    
+    return redirect(url_for('view_cart'))
+
+@app.route('/checkout', methods=['GET', 'POST'])
+def checkout():
+    if 'user_id' not in session:
+        flash('Please login to checkout', 'warning')
+        return redirect(url_for('login'))
+    
+    user_id = session['user_id']
+    
+    # Get user information
+    user = execute_query('SELECT * FROM users WHERE id = %s', (user_id,), fetch=True)
+    if not user:
+        flash('User information not found', 'danger')
+        return redirect(url_for('view_cart'))
+    
+    user = user[0]
+    
+    # Get cart items with product details
+    cart_items = execute_query('''
+        SELECT c.id, c.product_id, c.quantity, p.name, p.description, p.price, p.stock, p.image_url,
+               (p.price * c.quantity) as subtotal
+        FROM cart_items c
+        JOIN products p ON c.product_id = p.id
+        WHERE c.user_id = %s
+    ''', (user_id,), fetch=True)
+    
+    if not cart_items:
+        flash('Your cart is empty', 'warning')
+        return redirect(url_for('products'))
+    
+    # Calculate cart total
+    cart_total = sum(item['subtotal'] for item in cart_items)
+    
+    if request.method == 'POST':
+        # Get form data
+        delivery_address = request.form.get('delivery_address')
+        contact_phone = request.form.get('contact_phone')
+        payment_method = request.form.get('payment_method')
+        
+        # Validate form data
+        if not delivery_address or not contact_phone or not payment_method:
+            flash('Please fill in all required fields', 'danger')
+            return render_template('checkout.html', cart_items=cart_items, cart_total=cart_total, user=user)
+        
+        # Check if payment method is valid
+        valid_payment_methods = ['cash_on_delivery', 'upi', 'credit_card', 'debit_card']
+        if payment_method not in valid_payment_methods:
+            flash('Invalid payment method', 'danger')
+            return render_template('checkout.html', cart_items=cart_items, cart_total=cart_total, user=user)
+        
+        # Create order
+        try:
+            # Start with UPI transaction ID as None
+            upi_transaction_id = None
+            
+            # If payment method is UPI, get transaction ID
+            if payment_method == 'upi':
+                upi_transaction_id = request.form.get('upi_transaction_id')
+                if not upi_transaction_id:
+                    flash('UPI Transaction ID is required for UPI payments', 'danger')
+                    return render_template('checkout.html', cart_items=cart_items, cart_total=cart_total, user=user)
+            
+            # Insert order into database
+            order_id = execute_query(
+                '''INSERT INTO orders 
+                   (user_id, total_amount, payment_method, payment_status, delivery_address, contact_phone, upi_transaction_id)
+                   VALUES (%s, %s, %s, %s, %s, %s, %s)''',
+                (user_id, cart_total, payment_method, 
+                 'paid' if payment_method == 'upi' else 'pending', 
+                 delivery_address, contact_phone, upi_transaction_id),
+                commit=True,
+                return_last_id=True
+            )
+            
+            # Insert order items
+            for item in cart_items:
+                execute_query(
+                    '''INSERT INTO order_items 
+                       (order_id, product_id, quantity, price_per_unit, subtotal)
+                       VALUES (%s, %s, %s, %s, %s)''',
+                    (order_id, item['product_id'], item['quantity'], item['price'], item['subtotal']),
+                    commit=True
+                )
+                
+                # Update product stock
+                execute_query(
+                    'UPDATE products SET stock = stock - %s WHERE id = %s',
+                    (item['quantity'], item['product_id']),
+                    commit=True
+                )
+            
+            # Clear the cart
+            execute_query('DELETE FROM cart_items WHERE user_id = %s', (user_id,), commit=True)
+            
+            # Redirect to order confirmation page
+            flash('Order placed successfully!', 'success')
+            return redirect(url_for('order_confirmation', order_id=order_id))
+            
+        except mysql.connector.Error as err:
+            flash(f'Failed to place order: {err}', 'danger')
+            return render_template('checkout.html', cart_items=cart_items, cart_total=cart_total, user=user)
+    
+    return render_template('checkout.html', cart_items=cart_items, cart_total=cart_total, user=user)
+
+@app.route('/order/confirmation/<int:order_id>')
+def order_confirmation(order_id):
+    if 'user_id' not in session:
+        flash('Please login to view order confirmation', 'warning')
+        return redirect(url_for('login'))
+    
+    user_id = session['user_id']
+    
+    # Get order details
+    order = execute_query(
+        '''SELECT o.*, u.name as customer_name, u.email as customer_email
+           FROM orders o
+           JOIN users u ON o.user_id = u.id
+           WHERE o.id = %s AND o.user_id = %s''',
+        (order_id, user_id),
+        fetch=True
+    )
+    
+    if not order:
+        flash('Order not found', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    order = order[0]
+    
+    # Get order items
+    order_items = execute_query(
+        '''SELECT oi.*, p.name, p.image_url
+           FROM order_items oi
+           JOIN products p ON oi.product_id = p.id
+           WHERE oi.order_id = %s''',
+        (order_id,),
+        fetch=True
+    )
+    
+    # Process image URLs for products
+    for item in order_items:
+        if item['image_url']:
+            item['image_url'] = url_for('static', filename=item['image_url'])
+        else:
+            # Default image if none is set
+            item['image_url'] = url_for('static', filename='images/products/default-product.jpg')
+    
+    return render_template('order_confirmation.html', order=order, order_items=order_items)
+
+@app.route('/orders')
+def view_orders():
+    if 'user_id' not in session:
+        flash('Please login to view your orders', 'warning')
+        return redirect(url_for('login'))
+    
+    user_id = session['user_id']
+    
+    # Get all orders for the user
+    orders = execute_query(
+        '''SELECT o.*, COUNT(oi.id) as item_count
+           FROM orders o
+           JOIN order_items oi ON o.id = oi.order_id
+           WHERE o.user_id = %s
+           GROUP BY o.id
+           ORDER BY o.created_at DESC''',
+        (user_id,),
+        fetch=True
+    )
+    
+    if orders is None:
+        flash('Unable to retrieve orders. Database connection error.', 'danger')
+        orders = []
+    
+    return render_template('orders.html', orders=orders)
+
+@app.route('/orders/<int:order_id>')
+def view_order_details(order_id):
+    if 'user_id' not in session:
+        flash('Please login to view order details', 'warning')
+        return redirect(url_for('login'))
+    
+    user_id = session['user_id']
+    
+    # Get order details
+    order = execute_query(
+        '''SELECT o.*, u.name as customer_name, u.email as customer_email
+           FROM orders o
+           JOIN users u ON o.user_id = u.id
+           WHERE o.id = %s AND (o.user_id = %s OR %s = (SELECT id FROM users WHERE role = 'admin' AND id = %s))''',
+        (order_id, user_id, user_id, user_id),
+        fetch=True
+    )
+    
+    if not order:
+        flash('Order not found or you do not have permission to view it', 'danger')
+        return redirect(url_for('view_orders'))
+    
+    order = order[0]
+    
+    # Get order items
+    order_items = execute_query(
+        '''SELECT oi.*, p.name, p.image_url
+           FROM order_items oi
+           JOIN products p ON oi.product_id = p.id
+           WHERE oi.order_id = %s''',
+        (order_id,),
+        fetch=True
+    )
+    
+    # Process image URLs for products
+    for item in order_items:
+        if item['image_url']:
+            item['image_url'] = url_for('static', filename=item['image_url'])
+        else:
+            # Default image if none is set
+            item['image_url'] = url_for('static', filename='images/products/default-product.jpg')
+    
+    return render_template('order_details.html', order=order, order_items=order_items)
+
+@app.route('/admin/orders')
+def admin_view_orders():
+    if 'user_id' not in session or session['user_role'] != 'admin':
+        flash('Unauthorized access', 'danger')
+        return redirect(url_for('home'))
+    
+    # Get all orders
+    orders = execute_query(
+        '''SELECT o.*, u.name as customer_name, u.email as customer_email, COUNT(oi.id) as item_count
+           FROM orders o
+           JOIN users u ON o.user_id = u.id
+           JOIN order_items oi ON o.id = oi.order_id
+           GROUP BY o.id
+           ORDER BY o.created_at DESC''',
+        fetch=True
+    )
+    
+    if orders is None:
+        flash('Unable to retrieve orders. Database connection error.', 'danger')
+        orders = []
+    
+    return render_template('admin_orders.html', orders=orders)
+
+@app.route('/admin/orders/<int:order_id>')
+def admin_view_order_details(order_id):
+    if 'user_id' not in session or session['user_role'] != 'admin':
+        flash('Unauthorized access', 'danger')
+        return redirect(url_for('home'))
+    
+    # Get order details
+    order = execute_query(
+        '''SELECT o.*, u.name as customer_name, u.email as customer_email
+           FROM orders o
+           JOIN users u ON o.user_id = u.id
+           WHERE o.id = %s''',
+        (order_id,),
+        fetch=True
+    )
+    
+    if not order:
+        flash('Order not found', 'danger')
+        return redirect(url_for('admin_view_orders'))
+    
+    order = order[0]
+    
+    # Get order items
+    order_items = execute_query(
+        '''SELECT oi.*, p.name, p.image_url
+           FROM order_items oi
+           JOIN products p ON oi.product_id = p.id
+           WHERE oi.order_id = %s''',
+        (order_id,),
+        fetch=True
+    )
+    
+    # Process image URLs for products
+    for item in order_items:
+        if item['image_url']:
+            item['image_url'] = url_for('static', filename=item['image_url'])
+        else:
+            # Default image if none is set
+            item['image_url'] = url_for('static', filename='images/products/default-product.jpg')
+    
+    return render_template('admin_order_details.html', order=order, order_items=order_items)
+
+@app.route('/admin/orders/update-status/<int:order_id>', methods=['POST'])
+def admin_update_order_status(order_id):
+    if 'user_id' not in session or session['user_role'] != 'admin':
+        flash('Unauthorized access', 'danger')
+        return redirect(url_for('home'))
+    
+    order_status = request.form.get('order_status')
+    payment_status = request.form.get('payment_status')
+    
+    valid_order_statuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled']
+    valid_payment_statuses = ['pending', 'paid', 'failed', 'refunded']
+    
+    if order_status and order_status in valid_order_statuses:
+        execute_query(
+            'UPDATE orders SET order_status = %s WHERE id = %s',
+            (order_status, order_id),
+            commit=True
+        )
+        flash('Order status updated successfully!', 'success')
+    
+    if payment_status and payment_status in valid_payment_statuses:
+        execute_query(
+            'UPDATE orders SET payment_status = %s WHERE id = %s',
+            (payment_status, order_id),
+            commit=True
+        )
+        flash('Payment status updated successfully!', 'success')
+    
+    return redirect(url_for('admin_view_order_details', order_id=order_id))
 
 if __name__ == '__main__':
     app.run(debug=config.DEBUG) 

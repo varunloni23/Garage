@@ -63,7 +63,16 @@
                             {% endif %}
                         </div>
                         {% if 'user_id' in session %}
-                            <a href="#" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Add to Cart</a>
+                            {% if product.stock > 0 %}
+                                <form action="{{ url_for('add_to_cart', product_id=product.id) }}" method="POST" style="margin-top: 1rem;">
+                                    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                        <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="form-control" style="width: 80px;">
+                                        <button type="submit" class="btn btn-primary" style="flex-grow: 1;">Add to Cart</button>
+                                    </div>
+                                </form>
+                            {% else %}
+                                <button class="btn btn-secondary" disabled style="width: 100%; margin-top: 1rem;">Out of Stock</button>
+                            {% endif %}
                         {% else %}
                             <a href="{{ url_for('login') }}" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Login to Purchase</a>
                         {% endif %}
@@ -81,10 +90,10 @@
         
         <div class="products-grid">
             {% for product in [
-                {'name': 'Motor Oil (5W-30)', 'description': 'High-quality synthetic motor oil', 'price': '2499', 'stock': 50, 'image': 'products/motor-oil-5w30.jpg'},
-                {'name': 'Motor Oil (10W-40)', 'description': 'Conventional motor oil for older engines', 'price': '1699', 'stock': 45, 'image': 'products/motor-oil-10w40.jpg'},
-                {'name': 'Transmission Fluid', 'description': 'Automatic transmission fluid', 'price': '2099', 'stock': 30, 'image': 'products/transmission-fluid.jpg'},
-                {'name': 'Coolant/Antifreeze', 'description': 'All-season engine coolant', 'price': '1299', 'stock': 40, 'image': 'products/coolant.jpg'}
+                {'id': 101, 'name': 'Motor Oil (5W-30)', 'description': 'High-quality synthetic motor oil', 'price': '2499', 'stock': 50, 'image': 'products/motor-oil-5w30.jpg'},
+                {'id': 102, 'name': 'Motor Oil (10W-40)', 'description': 'Conventional motor oil for older engines', 'price': '1699', 'stock': 45, 'image': 'products/motor-oil-10w40.jpg'},
+                {'id': 103, 'name': 'Transmission Fluid', 'description': 'Automatic transmission fluid', 'price': '2099', 'stock': 30, 'image': 'products/transmission-fluid.jpg'},
+                {'id': 104, 'name': 'Coolant/Antifreeze', 'description': 'All-season engine coolant', 'price': '1299', 'stock': 40, 'image': 'products/coolant.jpg'}
             ] %}
                 <div class="product-card animate-fade-in">
                     <div class="product-image">
@@ -102,7 +111,16 @@
                             {% endif %}
                         </div>
                         {% if 'user_id' in session %}
-                            <a href="#" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Add to Cart</a>
+                            {% if product.stock > 0 %}
+                                <form action="{{ url_for('add_to_cart', product_id=product.id) }}" method="POST" style="margin-top: 1rem;">
+                                    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                        <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="form-control" style="width: 80px;">
+                                        <button type="submit" class="btn btn-primary" style="flex-grow: 1;">Add to Cart</button>
+                                    </div>
+                                </form>
+                            {% else %}
+                                <button class="btn btn-secondary" disabled style="width: 100%; margin-top: 1rem;">Out of Stock</button>
+                            {% endif %}
                         {% else %}
                             <a href="{{ url_for('login') }}" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Login to Purchase</a>
                         {% endif %}
@@ -120,10 +138,10 @@
         
         <div class="products-grid">
             {% for product in [
-                {'name': 'Oil Filter', 'description': 'Premium oil filter for most vehicles', 'price': '799', 'stock': 100, 'image': 'products/oil-filter.jpg'},
-                {'name': 'Air Filter', 'description': 'Engine air filter for better performance', 'price': '1199', 'stock': 75, 'image': 'products/air-filter.jpg'},
-                {'name': 'Cabin Air Filter', 'description': 'Improves air quality inside your vehicle', 'price': '1599', 'stock': 60, 'image': 'products/cabin-filter.jpg'},
-                {'name': 'Fuel Filter', 'description': 'Ensures clean fuel delivery to your engine', 'price': '999', 'stock': 50, 'image': 'products/fuel-filter.jpg'}
+                {'id': 201, 'name': 'Oil Filter', 'description': 'Premium oil filter for most vehicles', 'price': '799', 'stock': 100, 'image': 'products/oil-filter.jpg'},
+                {'id': 202, 'name': 'Air Filter', 'description': 'Engine air filter for better performance', 'price': '1199', 'stock': 75, 'image': 'products/air-filter.jpg'},
+                {'id': 203, 'name': 'Cabin Air Filter', 'description': 'Improves air quality inside your vehicle', 'price': '1599', 'stock': 60, 'image': 'products/cabin-filter.jpg'},
+                {'id': 204, 'name': 'Fuel Filter', 'description': 'Ensures clean fuel delivery to your engine', 'price': '999', 'stock': 50, 'image': 'products/fuel-filter.jpg'}
             ] %}
                 <div class="product-card animate-fade-in">
                     <div class="product-image">
@@ -141,7 +159,16 @@
                             {% endif %}
                         </div>
                         {% if 'user_id' in session %}
-                            <a href="#" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Add to Cart</a>
+                            {% if product.stock > 0 %}
+                                <form action="{{ url_for('add_to_cart', product_id=product.id) }}" method="POST" style="margin-top: 1rem;">
+                                    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                        <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="form-control" style="width: 80px;">
+                                        <button type="submit" class="btn btn-primary" style="flex-grow: 1;">Add to Cart</button>
+                                    </div>
+                                </form>
+                            {% else %}
+                                <button class="btn btn-secondary" disabled style="width: 100%; margin-top: 1rem;">Out of Stock</button>
+                            {% endif %}
                         {% else %}
                             <a href="{{ url_for('login') }}" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Login to Purchase</a>
                         {% endif %}
@@ -159,10 +186,10 @@
         
         <div class="products-grid">
             {% for product in [
-                {'name': 'Brake Pads', 'description': 'Ceramic brake pads for improved stopping power', 'price': '3999', 'stock': 30, 'image': 'products/brake-pads.jpg'},
-                {'name': 'Brake Rotors', 'description': 'Premium brake rotors for smooth braking', 'price': '6499', 'stock': 25, 'image': 'products/brake-rotors.jpg'},
-                {'name': 'Brake Fluid', 'description': 'DOT 3 brake fluid for hydraulic brake systems', 'price': '699', 'stock': 40, 'image': 'products/brake-fluid.jpg'},
-                {'name': 'Brake Calipers', 'description': 'Remanufactured brake calipers', 'price': '7499', 'stock': 15, 'image': 'products/brake-calipers.jpg'}
+                {'id': 301, 'name': 'Brake Pads', 'description': 'Ceramic brake pads for improved stopping power', 'price': '3999', 'stock': 30, 'image': 'products/brake-pads.jpg'},
+                {'id': 302, 'name': 'Brake Rotors', 'description': 'Premium brake rotors for smooth braking', 'price': '6499', 'stock': 25, 'image': 'products/brake-rotors.jpg'},
+                {'id': 303, 'name': 'Brake Fluid', 'description': 'DOT 3 brake fluid for hydraulic brake systems', 'price': '699', 'stock': 40, 'image': 'products/brake-fluid.jpg'},
+                {'id': 304, 'name': 'Brake Calipers', 'description': 'Remanufactured brake calipers', 'price': '7499', 'stock': 15, 'image': 'products/brake-calipers.jpg'}
             ] %}
                 <div class="product-card animate-fade-in">
                     <div class="product-image">
@@ -180,7 +207,16 @@
                             {% endif %}
                         </div>
                         {% if 'user_id' in session %}
-                            <a href="#" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Add to Cart</a>
+                            {% if product.stock > 0 %}
+                                <form action="{{ url_for('add_to_cart', product_id=product.id) }}" method="POST" style="margin-top: 1rem;">
+                                    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                        <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="form-control" style="width: 80px;">
+                                        <button type="submit" class="btn btn-primary" style="flex-grow: 1;">Add to Cart</button>
+                                    </div>
+                                </form>
+                            {% else %}
+                                <button class="btn btn-secondary" disabled style="width: 100%; margin-top: 1rem;">Out of Stock</button>
+                            {% endif %}
                         {% else %}
                             <a href="{{ url_for('login') }}" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Login to Purchase</a>
                         {% endif %}

@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+
+{% block title %}Order Confirmation - GarageHub{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="section" style="background-color: var(--success); color: var(--white); padding: 3rem 0;">
+    <div class="container">
+        <div class="text-center animate-fade-in">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h1 style="color: var(--white); font-size: 2.5rem; margin-bottom: 1rem;">Order Confirmed!</h1>
+            <p style="max-width: 700px; font-size: 1.1rem; margin: 0 auto;">
+                Thank you for your order. Your order has been successfully placed and is being processed.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Order Details Section -->
+<section class="section">
+    <div class="container">
+        <div class="order-confirmation-container animate-fade-in">
+            <div class="order-details">
+                <div class="order-header">
+                    <h2>Order #{{ order.id }}</h2>
+                    <p class="order-date">Placed on {{ order.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                </div>
+                
+                <div class="order-info-grid">
+                    <div class="order-info-card">
+                        <h3>Shipping Address</h3>
+                        <p>{{ order.delivery_address }}</p>
+                    </div>
+                    
+                    <div class="order-info-card">
+                        <h3>Contact Information</h3>
+                        <p>{{ order.customer_name }}</p>
+                        <p>{{ order.customer_email }}</p>
+                        <p>{{ order.contact_phone }}</p>
+                    </div>
+                    
+                    <div class="order-info-card">
+                        <h3>Payment Method</h3>
+                        <p>
+                            {% if order.payment_method == 'cash_on_delivery' %}
+                                Cash on Delivery
+                            {% elif order.payment_method == 'upi' %}
+                                UPI Payment
+                                {% if order.upi_transaction_id %}
+                                <br>Transaction ID: {{ order.upi_transaction_id }}
+                                {% endif %}
+                            {% else %}
+                                {{ order.payment_method|title }}
+                            {% endif %}
+                        </p>
+                        <p class="payment-status {{ order.payment_status }}">
+                            Payment Status: {{ order.payment_status|title }}
+                        </p>
+                    </div>
+                    
+                    <div class="order-info-card">
+                        <h3>Order Status</h3>
+                        <p class="order-status {{ order.order_status }}">{{ order.order_status|title }}</p>
+                    </div>
+                </div>
+                
+                <div class="order-items">
+                    <h3>Order Items</h3>
+                    <table class="order-items-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order_items %}
+                                <tr>
+                                    <td class="product-info">
+                                        <img src="{{ item.image_url }}" alt="{{ item.name }}" class="product-thumbnail">
+                                        <div>
+                                            <h4>{{ item.name }}</h4>
+                                        </div>
+                                    </td>
+                                    <td class="price">₹{{ item.price_per_unit }}</td>
+                                    <td class="quantity">{{ item.quantity }}</td>
+                                    <td class="subtotal">₹{{ item.subtotal }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-right">Subtotal</td>
+                                <td>₹{{ order.total_amount }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="text-right">Shipping</td>
+                                <td>Free</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td colspan="3" class="text-right">Total</td>
+                                <td>₹{{ order.total_amount }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="order-actions">
+                <a href="{{ url_for('view_orders') }}" class="btn btn-primary">View All Orders</a>
+                <a href="{{ url_for('products') }}" class="btn btn-outline">Continue Shopping</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .success-icon {
+        font-size: 5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .text-center {
+        text-align: center;
+    }
+    
+    .order-confirmation-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    .order-header {
+        margin-bottom: 2rem;
+    }
+    
+    .order-date {
+        color: var(--text-muted);
+    }
+    
+    .order-info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+    
+    .order-info-card {
+        background-color: var(--light-bg);
+        padding: 1.5rem;
+        border-radius: 8px;
+    }
+    
+    .order-info-card h3 {
+        margin-top: 0;
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+    }
+    
+    .order-info-card p {
+        margin: 0.5rem 0;
+    }
+    
+    .payment-status, .order-status {
+        font-weight: 600;
+    }
+    
+    .payment-status.pending, .order-status.pending {
+        color: var(--warning);
+    }
+    
+    .payment-status.paid, .order-status.completed, .order-status.delivered {
+        color: var(--success);
+    }
+    
+    .payment-status.failed, .order-status.cancelled {
+        color: var(--danger);
+    }
+    
+    .payment-status.processing, .order-status.processing, .order-status.shipped {
+        color: var(--primary);
+    }
+    
+    .order-items {
+        margin-bottom: 2.5rem;
+    }
+    
+    .order-items h3 {
+        margin-bottom: 1.5rem;
+    }
+    
+    .order-items-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .order-items-table th,
+    .order-items-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--light-border);
+    }
+    
+    .product-info {
+        display: flex;
+        align-items: center;
+    }
+    
+    .product-thumbnail {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 4px;
+        margin-right: 1rem;
+    }
+    
+    .product-info h4 {
+        margin: 0;
+        font-size: 1rem;
+    }
+    
+    .text-right {
+        text-align: right;
+    }
+    
+    .total-row {
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    
+    .order-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+        .order-info-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .order-items-table thead {
+            display: none;
+        }
+        
+        .order-items-table tbody tr {
+            display: block;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--light-border);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        
+        .order-items-table td {
+            display: flex;
+            justify-content: space-between;
+            border: none;
+            padding: 0.5rem 0;
+        }
+        
+        .order-items-table td::before {
+            content: attr(data-label);
+            font-weight: 600;
+        }
+        
+        .product-info {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .product-thumbnail {
+            margin: 0 auto 1rem;
+        }
+    }
+</style>
+{% endblock %} 

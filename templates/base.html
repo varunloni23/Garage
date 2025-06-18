@@ -16,6 +16,30 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     
+    <style>
+        .cart-link {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            position: relative;
+        }
+        
+        .cart-link i {
+            font-size: 1.1em;
+        }
+        
+        .cart-count {
+            background-color: var(--accent);
+            color: white;
+            font-size: 0.7em;
+            font-weight: bold;
+            border-radius: 50%;
+            padding: 2px 6px;
+            position: relative;
+            margin-left: 2px;
+        }
+    </style>
+    
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -35,6 +59,14 @@
                     <li><a href="{{ url_for('products') }}">Products</a></li>
                     <li><a href="{{ url_for('contact') }}">Contact</a></li>
                     {% if 'user_id' in session %}
+                        <li>
+                            <a href="{{ url_for('view_cart') }}" class="cart-link">
+                                <i class="fas fa-shopping-cart"></i> Cart
+                                {% if cart_count > 0 %}
+                                <span class="cart-count">{{ cart_count }}</span>
+                                {% endif %}
+                            </a>
+                        </li>
                         {% if session['user_role'] == 'admin' %}
                             <li><a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a></li>
                         {% else %}

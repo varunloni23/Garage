@@ -1,0 +1,383 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - GarageHub{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="section" style="background-color: var(--primary); color: var(--white); padding: 3rem 0;">
+    <div class="container">
+        <h1 class="animate-fade-in" style="color: var(--white); font-size: 2.5rem; margin-bottom: 1rem;">Checkout</h1>
+        <p class="animate-fade-in" style="max-width: 700px; font-size: 1.1rem;">
+            Complete your order by providing delivery and payment information.
+        </p>
+    </div>
+</section>
+
+<!-- Checkout Section -->
+<section class="section">
+    <div class="container">
+        <div class="checkout-container animate-fade-in">
+            <div class="checkout-form">
+                <form action="{{ url_for('checkout') }}" method="POST" id="checkout-form">
+                    <div class="form-section">
+                        <h2>Delivery Information</h2>
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" id="name" name="name" class="form-control" value="{{ user.name }}" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" class="form-control" value="{{ user.email }}" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="delivery_address">Delivery Address *</label>
+                            <textarea id="delivery_address" name="delivery_address" class="form-control" rows="3" required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contact_phone">Contact Phone *</label>
+                            <input type="tel" id="contact_phone" name="contact_phone" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h2>Payment Method</h2>
+                        <div class="payment-methods">
+                            <div class="payment-method">
+                                <input type="radio" id="cash_on_delivery" name="payment_method" value="cash_on_delivery" checked>
+                                <label for="cash_on_delivery">
+                                    <div class="payment-icon">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                    </div>
+                                    <div class="payment-details">
+                                        <h3>Cash on Delivery</h3>
+                                        <p>Pay with cash when your order is delivered</p>
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <div class="payment-method">
+                                <input type="radio" id="upi" name="payment_method" value="upi">
+                                <label for="upi">
+                                    <div class="payment-icon">
+                                        <i class="fas fa-mobile-alt"></i>
+                                    </div>
+                                    <div class="payment-details">
+                                        <h3>UPI Payment</h3>
+                                        <p>Pay using UPI apps like Google Pay, PhonePe, Paytm</p>
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <div id="upi-details" style="display: none; margin-top: 1rem; padding: 1rem; background-color: #f8f8f8; border-radius: 8px;">
+                                <h3>UPI Payment Details</h3>
+                                <p>Please make payment to the following UPI ID:</p>
+                                <div style="background-color: #fff; padding: 1rem; border-radius: 4px; margin: 1rem 0; font-size: 1.2rem; text-align: center; font-weight: bold;">
+                                    garage@upi
+                                </div>
+                                <div class="form-group">
+                                    <label for="upi_transaction_id">UPI Transaction ID *</label>
+                                    <input type="text" id="upi_transaction_id" name="upi_transaction_id" class="form-control">
+                                    <small>Enter the transaction ID after completing your payment</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <a href="{{ url_for('view_cart') }}" class="btn btn-outline">Back to Cart</a>
+                        <button type="submit" class="btn btn-primary">Place Order</button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="order-summary">
+                <div class="summary-card">
+                    <h2>Order Summary</h2>
+                    <div class="cart-items-summary">
+                        {% for item in cart_items %}
+                            <div class="cart-item">
+                                <div class="item-image">
+                                    <img src="{{ item.image_url }}" alt="{{ item.name }}">
+                                </div>
+                                <div class="item-details">
+                                    <h3>{{ item.name }}</h3>
+                                    <div class="item-meta">
+                                        <span>Qty: {{ item.quantity }}</span>
+                                        <span>₹{{ item.price }} each</span>
+                                    </div>
+                                    <div class="item-subtotal">₹{{ item.subtotal }}</div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span>₹{{ cart_total }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Shipping</span>
+                        <span>Free</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total</span>
+                        <span>₹{{ cart_total }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .checkout-container {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .checkout-form {
+        flex: 3;
+    }
+    
+    .order-summary {
+        flex: 2;
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--light-border);
+    }
+    
+    .form-section h2 {
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.8rem;
+        border: 1px solid var(--light-border);
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+    }
+    
+    .payment-methods {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .payment-method {
+        position: relative;
+    }
+    
+    .payment-method input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    
+    .payment-method label {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border: 1px solid var(--light-border);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .payment-method input[type="radio"]:checked + label {
+        border-color: var(--primary);
+        background-color: rgba(var(--primary-rgb), 0.05);
+    }
+    
+    .payment-icon {
+        font-size: 1.5rem;
+        width: 50px;
+        height: 50px;
+        background-color: var(--light-bg);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+    }
+    
+    .payment-details h3 {
+        margin: 0 0 0.5rem;
+        font-size: 1.1rem;
+    }
+    
+    .payment-details p {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+    
+    .summary-card {
+        background-color: var(--light-bg);
+        padding: 1.5rem;
+        border-radius: 8px;
+    }
+    
+    .summary-card h2 {
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+    }
+    
+    .cart-items-summary {
+        margin-bottom: 1.5rem;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .cart-item {
+        display: flex;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--light-border);
+    }
+    
+    .item-image {
+        width: 60px;
+        height: 60px;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-right: 1rem;
+    }
+    
+    .item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .item-details {
+        flex-grow: 1;
+    }
+    
+    .item-details h3 {
+        margin: 0 0 0.5rem;
+        font-size: 1rem;
+    }
+    
+    .item-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+    }
+    
+    .item-subtotal {
+        font-weight: 600;
+        text-align: right;
+    }
+    
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+    
+    .summary-row.total {
+        font-weight: bold;
+        font-size: 1.3rem;
+        border-top: 1px solid var(--light-border);
+        padding-top: 1rem;
+        margin-top: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+        .checkout-container {
+            flex-direction: column-reverse;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .form-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const upiRadio = document.getElementById('upi');
+        const cashRadio = document.getElementById('cash_on_delivery');
+        const upiDetails = document.getElementById('upi-details');
+        const upiTransactionId = document.getElementById('upi_transaction_id');
+        const checkoutForm = document.getElementById('checkout-form');
+        
+        // Show/hide UPI details based on payment method selection
+        upiRadio.addEventListener('change', function() {
+            if (this.checked) {
+                upiDetails.style.display = 'block';
+                upiTransactionId.setAttribute('required', 'required');
+            }
+        });
+        
+        cashRadio.addEventListener('change', function() {
+            if (this.checked) {
+                upiDetails.style.display = 'none';
+                upiTransactionId.removeAttribute('required');
+            }
+        });
+        
+        // Form validation
+        checkoutForm.addEventListener('submit', function(event) {
+            const deliveryAddress = document.getElementById('delivery_address').value.trim();
+            const contactPhone = document.getElementById('contact_phone').value.trim();
+            
+            if (!deliveryAddress) {
+                event.preventDefault();
+                alert('Please enter a delivery address');
+                return;
+            }
+            
+            if (!contactPhone) {
+                event.preventDefault();
+                alert('Please enter a contact phone number');
+                return;
+            }
+            
+            if (upiRadio.checked) {
+                const transactionId = upiTransactionId.value.trim();
+                if (!transactionId) {
+                    event.preventDefault();
+                    alert('Please enter the UPI transaction ID');
+                    return;
+                }
+            }
+        });
+    });
+</script>
+{% endblock %} 

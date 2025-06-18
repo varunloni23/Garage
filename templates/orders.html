@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+
+{% block title %}My Orders - GarageHub{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="section" style="background-color: var(--primary); color: var(--white); padding: 3rem 0;">
+    <div class="container">
+        <h1 class="animate-fade-in" style="color: var(--white); font-size: 2.5rem; margin-bottom: 1rem;">My Orders</h1>
+        <p class="animate-fade-in" style="max-width: 700px; font-size: 1.1rem;">
+            View and track all your orders in one place.
+        </p>
+    </div>
+</section>
+
+<!-- Orders Section -->
+<section class="section">
+    <div class="container">
+        {% if orders %}
+            <div class="orders-container animate-fade-in">
+                <div class="orders-list">
+                    {% for order in orders %}
+                        <div class="order-card">
+                            <div class="order-card-header">
+                                <div class="order-info">
+                                    <h2>Order #{{ order.id }}</h2>
+                                    <p class="order-date">{{ order.created_at.strftime('%B %d, %Y') }}</p>
+                                </div>
+                                <div class="order-status {{ order.order_status }}">
+                                    {{ order.order_status|title }}
+                                </div>
+                            </div>
+                            
+                            <div class="order-card-body">
+                                <div class="order-summary">
+                                    <div class="order-items-count">
+                                        <i class="fas fa-box"></i> {{ order.item_count }} item{{ 's' if order.item_count != 1 }}
+                                    </div>
+                                    <div class="order-total">
+                                        <strong>Total:</strong> ₹{{ order.total_amount }}
+                                    </div>
+                                </div>
+                                
+                                <div class="order-payment">
+                                    <div class="payment-method">
+                                        <strong>Payment:</strong> 
+                                        {% if order.payment_method == 'cash_on_delivery' %}
+                                            Cash on Delivery
+                                        {% elif order.payment_method == 'upi' %}
+                                            UPI Payment
+                                        {% else %}
+                                            {{ order.payment_method|title }}
+                                        {% endif %}
+                                    </div>
+                                    <div class="payment-status {{ order.payment_status }}">
+                                        {{ order.payment_status|title }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="order-card-footer">
+                                <a href="{{ url_for('view_order_details', order_id=order.id) }}" class="btn btn-outline">View Details</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-orders animate-fade-in">
+                <div class="empty-orders-icon">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+                <h2>No orders yet</h2>
+                <p>You haven't placed any orders yet. Start shopping to place your first order.</p>
+                <a href="{{ url_for('products') }}" class="btn btn-primary">Browse Products</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<style>
+    .orders-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    .orders-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .order-card {
+        background-color: var(--white);
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .order-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        background-color: var(--light-bg);
+        border-bottom: 1px solid var(--light-border);
+    }
+    
+    .order-info h2 {
+        margin: 0;
+        font-size: 1.2rem;
+    }
+    
+    .order-date {
+        margin: 0.5rem 0 0;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+    
+    .order-status {
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        text-align: center;
+        min-width: 100px;
+    }
+    
+    .order-status.pending {
+        background-color: rgba(var(--warning-rgb), 0.1);
+        color: var(--warning);
+    }
+    
+    .order-status.processing, .order-status.shipped {
+        background-color: rgba(var(--primary-rgb), 0.1);
+        color: var(--primary);
+    }
+    
+    .order-status.delivered, .order-status.completed {
+        background-color: rgba(var(--success-rgb), 0.1);
+        color: var(--success);
+    }
+    
+    .order-status.cancelled {
+        background-color: rgba(var(--danger-rgb), 0.1);
+        color: var(--danger);
+    }
+    
+    .order-card-body {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--light-border);
+    }
+    
+    .order-summary {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+    
+    .order-items-count {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .order-payment {
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .payment-status {
+        font-weight: 600;
+    }
+    
+    .payment-status.pending {
+        color: var(--warning);
+    }
+    
+    .payment-status.paid {
+        color: var(--success);
+    }
+    
+    .payment-status.failed, .payment-status.refunded {
+        color: var(--danger);
+    }
+    
+    .order-card-footer {
+        padding: 1.5rem;
+        text-align: right;
+    }
+    
+    .empty-orders {
+        text-align: center;
+        padding: 3rem 0;
+    }
+    
+    .empty-orders-icon {
+        font-size: 4rem;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+    }
+    
+    .empty-orders h2 {
+        margin-bottom: 1rem;
+    }
+    
+    .empty-orders p {
+        margin-bottom: 2rem;
+        color: var(--text-muted);
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    @media (max-width: 768px) {
+        .order-card-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .order-status {
+            margin-top: 1rem;
+        }
+        
+        .order-summary, .order-payment {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+</style>
+{% endblock %} 
